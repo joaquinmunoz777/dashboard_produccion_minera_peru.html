@@ -3,52 +3,50 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>iA · Producción Minera Mensual — Perú (MINEM / BCRP)</title>
+<title>iA · Producción de Cobre por Mina — Cochilco (mensual)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  :root{--bg:#0D1B2A;--bg-2:#0A1521;--panel:#13243A;--panel-2:#16293F;--line:#243A52;--line-soft:#1C2F45;--ink:#E8EEF4;--muted:#8FA6BC;--muted-2:#637C93;--copper:#D98A47;--copper-bright:#E8A05B;--red:#E5484D;--green:#3DB389;--radius:14px;--radius-s:10px;--shadow:0 1px 0 rgba(255,255,255,.03),0 12px 30px -18px rgba(0,0,0,.7);
-    --m-cu:#D98A47;--m-au:#E3B341;--m-ag:#AEB7C2;--m-zn:#6FA8C7;--m-pb:#8A93A6;--m-sn:#C77B5A;--m-fe:#B5563F;--m-mo:#7E8AA3;--mc:#D98A47;}
+  :root{--bg:#0D1B2A;--bg-2:#0A1521;--panel:#13243A;--panel-2:#16293F;--line:#243A52;--line-soft:#1C2F45;--ink:#E8EEF4;--muted:#8FA6BC;--muted-2:#637C93;--copper:#D98A47;--copper-bright:#E8A05B;--copper-deep:#A85F2C;--red:#E5484D;--green:#3DB389;--y2021:#5B8FB9;--y2022:#C99A2E;--y2023:#7A8AA0;--y2024:#4FA67C;--y2025:#9AA7B6;--y2026:#E5484D;--radius:14px;--radius-s:10px;--shadow:0 1px 0 rgba(255,255,255,.03),0 12px 30px -18px rgba(0,0,0,.7);}
   *{box-sizing:border-box}
-  html,body{margin:0;background:radial-gradient(1200px 600px at 78% -10%,rgba(217,138,71,.10),transparent 60%),radial-gradient(900px 500px at -5% 0%,rgba(111,168,199,.08),transparent 55%),var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;background:radial-gradient(1200px 600px at 78% -10%,rgba(217,138,71,.10),transparent 60%),radial-gradient(900px 500px at -5% 0%,rgba(91,143,185,.08),transparent 55%),var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;}
   .num,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
   h1,h2,h3,.display{font-family:"Space Grotesk",Inter,sans-serif;letter-spacing:-.01em}
   a{color:var(--copper-bright);cursor:pointer}
   .wrap{max-width:1280px;margin:0 auto;padding:22px 22px 64px}
   header.bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:16px 18px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,var(--panel),var(--panel-2));box-shadow:var(--shadow)}
-  .brand{display:flex;align-items:center;gap:13px} .mark{width:46px;height:46px;flex:0 0 auto}
-  .brand .txt{display:flex;flex-direction:column;line-height:1.05}
+  .brand{display:flex;align-items:center;gap:13px;min-width:0}
+  .mark{width:46px;height:46px;flex:0 0 auto}
+  .brand .txt{display:flex;flex-direction:column;line-height:1.05;min-width:0}
   .brand .txt b{font-family:"Space Grotesk";font-weight:700;font-size:15px;letter-spacing:.16em}
   .brand .txt span{font-size:10.5px;color:var(--muted);letter-spacing:.34em;text-transform:uppercase;margin-top:3px}
   .titleblock{margin-left:6px;padding-left:18px;border-left:1px solid var(--line);min-width:0}
-  .titleblock h1{font-size:18px;font-weight:600;margin:0} .titleblock p{margin:3px 0 0;font-size:12px;color:var(--muted)} .titleblock p .dot{color:var(--copper)}
+  .titleblock h1{font-size:18px;font-weight:600;margin:0}
+  .titleblock p{margin:3px 0 0;font-size:12px;color:var(--muted)} .titleblock p .dot{color:var(--copper)}
   .grow{flex:1 1 40px}
-  .status{font-size:11px;color:var(--muted-2);text-align:right;line-height:1.5;max-width:320px;font-family:"JetBrains Mono"}
-  .status .led{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted-2);margin-right:6px;vertical-align:middle}
-  .status.ok .led{background:var(--green)} .status.err .led{background:var(--red)} .status.load .led{background:var(--copper);animation:pulse 1s infinite}
-  @keyframes pulse{50%{opacity:.3}}
-  .minerals{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
-  .mn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel-2));border-radius:12px;padding:9px 14px;cursor:pointer;transition:.14s;color:var(--ink)}
-  .mn:hover{border-color:var(--muted-2)}
-  .mn[aria-pressed="true"]{border-color:var(--mcl);box-shadow:inset 0 0 0 1px var(--mcl),0 6px 18px -10px var(--mcl)}
-  .mn .dot{width:11px;height:11px;border-radius:3px;background:var(--mcl)}
-  .mn .lab{font-family:"Space Grotesk";font-weight:600;font-size:13.5px;color:#F2F6FA} .mn .sub{font-family:"JetBrains Mono";font-size:10px;color:var(--muted)}
-  .uploader{margin-top:14px;border:1px dashed var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(217,138,71,.05),rgba(217,138,71,.015));padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;transition:.18s}
+  .src{font-size:11px;color:var(--muted-2);text-align:right;line-height:1.5;max-width:320px} .src b{color:var(--muted)}
+  .uploader{margin-top:14px;border:1px dashed var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(217,138,71,.05),rgba(217,138,71,.015));padding:13px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;transition:.18s}
   .uploader.drag{border-color:var(--copper);background:rgba(217,138,71,.12)}
-  .uploader .ic{width:30px;height:30px;flex:0 0 auto;color:var(--copper)}
-  .uploader .u-txt{flex:1 1 260px;min-width:230px} .uploader .u-txt b{font-size:12.5px} .uploader .u-txt p{margin:3px 0 0;font-size:11px;color:var(--muted)}
-  .btn{font-family:"Space Grotesk";font-weight:600;font-size:13px;border-radius:10px;cursor:pointer;border:1px solid #a85f2c;background:linear-gradient(180deg,var(--copper),#a85f2c);color:#1a0f06;padding:9px 15px;transition:.15s;white-space:nowrap}
-  .btn:hover{filter:brightness(1.07)} .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)} .btn.ghost:hover{border-color:var(--copper);color:var(--copper-bright)} .btn.sm{padding:7px 12px;font-size:12px}
+  .uploader .ic{width:32px;height:32px;flex:0 0 auto;color:var(--copper)}
+  .uploader .u-txt{flex:1 1 260px;min-width:230px}
+  .uploader .u-txt b{font-size:13px} .uploader .u-txt p{margin:3px 0 0;font-size:11.5px;color:var(--muted)}
+  .btn{font-family:"Space Grotesk";font-weight:600;font-size:13px;border-radius:10px;cursor:pointer;border:1px solid var(--copper-deep);background:linear-gradient(180deg,var(--copper),var(--copper-deep));color:#1a0f06;padding:10px 16px;transition:.15s;white-space:nowrap}
+  .btn:hover{filter:brightness(1.07)} .btn:focus-visible{outline:2px solid var(--copper-bright);outline-offset:2px}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)} .btn.ghost:hover{border-color:var(--copper);color:var(--copper-bright)}
+  .btn.sm{padding:7px 12px;font-size:12px}
+  .u-status{font-size:11px;color:var(--muted);font-family:"JetBrains Mono"} .u-status.ok{color:var(--green)} .u-status.err{color:var(--red)}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
   .kpi{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,var(--panel),var(--panel-2));padding:16px 16px 14px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
-  .kpi .ey{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)}
-  .kpi .v{font-family:"Space Grotesk";font-weight:700;font-size:27px;margin:6px 0 2px;letter-spacing:-.02em}
-  .kpi .v small{font-size:13px;font-weight:500;color:var(--muted);margin-left:4px} .kpi .sub{font-size:11px;color:var(--muted);line-height:1.45}
+  .kpi .ey{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2)}
+  .kpi .v{font-family:"Space Grotesk";font-weight:700;font-size:29px;margin:6px 0 2px;letter-spacing:-.02em}
+  .kpi .v small{font-size:13px;font-weight:500;color:var(--muted);margin-left:4px}
+  .kpi .sub{font-size:11px;color:var(--muted);line-height:1.45}
   .chip{display:inline-block;font-family:"JetBrains Mono";font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:4px}
   .chip.up{background:rgba(61,179,137,.16);color:var(--green)} .chip.dn{background:rgba(229,72,77,.16);color:var(--red)}
-  .kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--mc)}
+  .kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--copper)}
+  .kpi.red::after{background:var(--red)} .kpi.green::after{background:var(--green)} .kpi.blue::after{background:var(--y2021)}
   .tabs{display:flex;gap:4px;margin:22px 0 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
   .tab{font-family:"Space Grotesk";font-weight:600;font-size:13px;color:var(--muted);background:none;border:none;padding:10px 14px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
   .tab:hover{color:var(--ink)} .tab[aria-selected="true"]{color:var(--copper-bright);border-bottom-color:var(--copper)}
@@ -58,366 +56,480 @@
   .card .hd{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
   .card .hd h2{font-size:14px;font-weight:600;margin:0} .card .hd .meta{font-size:11.5px;color:var(--muted);font-family:"JetBrains Mono"}
   .card .bd{padding:16px}
+  .split{display:grid;grid-template-columns:300px 1fr;gap:16px}
+  .minelist{max-height:600px;overflow:auto;border:1px solid var(--line-soft);border-radius:var(--radius-s)}
+  .search{width:100%;border:none;border-bottom:1px solid var(--line);background:var(--bg-2);color:var(--ink);padding:11px 13px;font-size:13px;position:sticky;top:0;z-index:2}
+  .search:focus{outline:none;border-bottom-color:var(--copper)}
+  .mrow{display:flex;align-items:center;gap:9px;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--line-soft);transition:.12s}
+  .mrow:hover{background:rgba(217,138,71,.06)}
+  .mrow[aria-current="true"]{background:rgba(217,138,71,.12);box-shadow:inset 3px 0 0 var(--copper)}
+  .mrow .nm{flex:1 1 auto;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrow .nm small{color:var(--muted-2);font-weight:400;font-size:10.5px}
+  .mrow .tag{font-family:"JetBrains Mono";font-size:8.5px;letter-spacing:.04em;padding:1px 4px;border:1px solid var(--line);border-radius:5px;color:var(--copper-bright)}
+  .mrow .tag.mo{color:var(--green);border-color:rgba(61,179,137,.4)}
+  .mrow .vt{font-family:"JetBrains Mono";font-size:11px;color:var(--muted);white-space:nowrap}
+  .mrow .yo{font-family:"JetBrains Mono";font-size:10px;font-weight:700;width:44px;text-align:right}
+  .yo.up{color:var(--green)} .yo.dn{color:var(--red)} .yo.na{color:var(--muted-2)}
+  .mrow.crow{background:rgba(255,255,255,.025)} .mrow.crow .nm b{font-weight:700;font-size:13px}
+  .mrow.crow .chev{flex:0 0 auto;width:12px;color:var(--copper-bright);font-size:10px;text-align:center}
+  .mrow.sub{padding-left:30px;background:rgba(0,0,0,.12)} .mrow.sub .nm{font-weight:400}
+  .seg.sm button{padding:5px 9px;font-size:10.5px}
+  .yearchips{display:flex;gap:6px;flex-wrap:wrap} .yearchips.hide{display:none}
+  .yc{font-family:"JetBrains Mono";font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;transition:.12s}
+  .yc .sw{width:9px;height:9px;border-radius:2px} .yc[aria-pressed="true"]{color:var(--ink);border-color:var(--muted-2)} .yc[aria-pressed="false"]{opacity:.45}
   .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .seg button{font-family:"JetBrains Mono";font-size:11px;font-weight:700;background:transparent;color:var(--muted);border:none;padding:7px 12px;cursor:pointer}
-  .seg button[aria-pressed="true"]{background:var(--mc);color:#0c0c0c}
-  .yearchips{display:flex;gap:5px;flex-wrap:wrap} .yearchips.hide{display:none}
-  .yc{font-family:"JetBrains Mono";font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer} .yc[aria-pressed="true"]{color:var(--ink);border-color:var(--muted-2)} .yc[aria-pressed="false"]{opacity:.4}
+  .seg button[aria-pressed="true"]{background:var(--copper);color:#1a0f06}
   .chart-h{position:relative;height:430px}
-  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:100%;text-align:center;color:var(--muted);padding:26px}
-  .empty svg{width:42px;height:42px;color:var(--mc);opacity:.85} .empty b{font-family:"Space Grotesk";font-weight:600;font-size:15px;color:var(--ink)} .empty p{font-size:12.5px;max-width:430px;margin:0;line-height:1.55}
-  .barrow{display:grid;grid-template-columns:210px 1fr 120px;align-items:center;gap:12px;padding:7px 0}
-  .barrow .lab{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .barrow .lab small{color:var(--muted-2);font-size:10.5px}
-  .bartrack{height:20px;background:var(--bg-2);border-radius:6px;overflow:hidden} .barfill{height:100%;border-radius:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--mc) 55%,#000),var(--mc));transition:width .5s ease}
+  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:100%;text-align:center;color:var(--muted);padding:30px}
+  .empty svg{width:42px;height:42px;color:var(--copper);opacity:.8}
+  .empty b{font-family:"Space Grotesk";font-weight:600;font-size:15px;color:var(--ink)}
+  .empty p{font-size:12.5px;max-width:400px;margin:0;line-height:1.55}
+  .barrow{display:grid;grid-template-columns:210px 1fr 132px;align-items:center;gap:12px;padding:7px 0}
+  .barrow .lab{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bartrack{height:20px;background:var(--bg-2);border-radius:6px;overflow:hidden}
+  .barfill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--copper-deep),var(--copper));transition:width .5s ease}
+  .barfill.cap{background:linear-gradient(90deg,#3f6f8f,var(--y2021))}
   .barrow .val{font-family:"JetBrains Mono";font-size:12px;text-align:right;color:var(--muted)} .barrow .val b{color:var(--ink)}
-  .split{display:grid;grid-template-columns:270px 1fr;gap:16px}
-  .minelist{max-height:520px;overflow:auto;border:1px solid var(--line-soft);border-radius:var(--radius-s)}
-  .search{width:100%;border:none;border-bottom:1px solid var(--line);background:var(--bg-2);color:var(--ink);padding:11px 13px;font-size:13px;position:sticky;top:0;z-index:2} .search:focus{outline:none;border-bottom-color:var(--copper)}
-  .mrow{display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--line-soft);transition:.12s} .mrow:hover{background:rgba(217,138,71,.06)} .mrow[aria-current="true"]{background:rgba(217,138,71,.12);box-shadow:inset 3px 0 0 var(--mc)}
-  .mrow .nm{flex:1 1 auto;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .mrow .vt{font-family:"JetBrains Mono";font-size:11px;color:var(--muted)}
+  table.dt{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.dt th,table.dt td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line-soft)}
+  table.dt th{font-family:"Space Grotesk";font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;background:var(--panel)}
+  table.dt td:first-child,table.dt th:first-child{text-align:left} table.dt td.mono{font-family:"JetBrains Mono"}
+  table.dt tr:hover td{background:rgba(217,138,71,.05)}
+  td .pn{font-weight:700} .pn.up{color:var(--green)} .pn.dn{color:var(--red)} .pn.na{color:var(--muted-2)}
   .note{font-size:11.5px;color:var(--muted-2);line-height:1.6;margin-top:10px} .note b{color:var(--muted)}
-  .pill{display:inline-block;font-family:"JetBrains Mono";font-size:10px;letter-spacing:.04em;padding:1px 6px;border:1px solid var(--line);border-radius:5px;color:var(--muted);margin-left:6px;vertical-align:middle} .pill.ok{color:var(--green);border-color:rgba(61,179,137,.4)} .pill.est{color:var(--copper-bright);border-color:rgba(217,138,71,.4)}
+  .pill{display:inline-block;font-family:"JetBrains Mono";font-size:10px;letter-spacing:.04em;padding:1px 6px;border:1px solid var(--line);border-radius:5px;color:var(--muted);margin-left:6px;vertical-align:middle}
+  .pill.ok{color:var(--green);border-color:rgba(61,179,137,.4)} .pill.est{color:var(--copper-bright);border-color:rgba(217,138,71,.4)}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   footer{margin-top:26px;border-top:1px solid var(--line);padding-top:16px;font-size:11px;color:var(--muted-2);line-height:1.6}
   .modal{position:fixed;inset:0;background:rgba(5,11,18,.7);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px} .modal.open{display:flex}
-  .modal .box{max-width:760px;width:100%;max-height:88vh;overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);box-shadow:0 30px 80px -20px #000}
-  .modal .box .hd{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)} .modal .box .bd{padding:18px} .modal .box .bd h3{margin:0 0 8px;font-size:14px} .modal .box .bd p,.modal .box .bd li{font-size:12.5px;color:var(--muted);line-height:1.6}
+  .modal .box{max-width:780px;width:100%;max-height:88vh;overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);box-shadow:0 30px 80px -20px #000}
+  .modal .box .hd{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .modal .box .bd{padding:18px} .modal .box .bd h3{margin:0 0 8px;font-size:14px}
+  .modal .box .bd p,.modal .box .bd li{font-size:12.5px;color:var(--muted);line-height:1.6}
   .modal pre{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;font-family:"JetBrains Mono";font-size:11px;color:var(--copper-bright)}
-  .mapgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0} .mapgrid label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px} .mapgrid select{width:100%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:9px 10px;font-family:"JetBrains Mono";font-size:12px}
-  .preview{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:230px} .preview table{border-collapse:collapse;font-size:11px;font-family:"JetBrains Mono"} .preview td{border:1px solid var(--line-soft);padding:4px 7px;white-space:nowrap;color:var(--muted)} .preview tr:first-child td{color:var(--copper-bright);font-weight:700}
-  @media (max-width:920px){.kpis{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.minelist{max-height:300px}.status{text-align:left;max-width:none}.titleblock{border-left:none;padding-left:0;margin-left:0}.barrow{grid-template-columns:140px 1fr 100px}}
+  .mapgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  .mapgrid label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+  .mapgrid select,.mapgrid input{width:100%;background:var(--bg-2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:9px 10px;font-family:"JetBrains Mono";font-size:12px}
+  .preview{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:240px}
+  .preview table{border-collapse:collapse;font-size:11px;font-family:"JetBrains Mono"} .preview td{border:1px solid var(--line-soft);padding:4px 7px;white-space:nowrap;color:var(--muted)} .preview tr:first-child td{color:var(--copper-bright);font-weight:700}
+  @media (max-width:920px){.kpis{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.minelist{max-height:320px}.src{text-align:left;max-width:none}.titleblock{border-left:none;padding-left:0;margin-left:0}.barrow{grid-template-columns:130px 1fr 110px}}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="bar">
-    <div class="brand"><svg class="mark" viewBox="0 0 100 100" aria-label="Inversiones Adriana"><rect x="2" y="2" width="96" height="96" rx="16" fill="#0A1521" stroke="#D98A47" stroke-width="2"/><text x="50" y="68" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="50" fill="#E8EEF4">i<tspan fill="#D98A47">A</tspan></text></svg><div class="txt"><b>INVERSIONES</b><span>Adriana</span></div></div>
-    <div class="titleblock"><h1>Producción minera mensual — Perú</h1><p>Evolución mensual por mineral <span class="dot">·</span> BCRP (fuente INEI/MINEM) en vivo · detalle por unidad: Cuadros MINEM</p></div>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 100 100" aria-label="Inversiones Adriana"><rect x="2" y="2" width="96" height="96" rx="16" fill="#0A1521" stroke="#D98A47" stroke-width="2"/><text x="50" y="68" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="50" fill="#E8EEF4">i<tspan fill="#D98A47">A</tspan></text></svg>
+      <div class="txt"><b>INVERSIONES</b><span>Adriana</span></div>
+    </div>
+    <div class="titleblock"><h1>Producción de cobre por mina — Chile</h1><p>Tablero mensual <span class="dot">·</span> Cochilco (Tabla 17) + reportes de empresas <span class="dot">·</span> estacional &amp; histórico</p></div>
     <div class="grow"></div>
-    <div class="status load" id="status"><span class="led"></span>Conectando con BCRPData…</div>
+    <div class="src"><b>Cargado:</b> faenas grandes con anual 2024–2025 + acumulado 2026; Mantoverde/Mantos Blancos con serie mensual.<br>Un clic → última versión oficial Cochilco. ↓</div>
   </header>
-
-  <div class="minerals" id="minerals"></div>
 
   <div class="uploader" id="drop">
     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-    <div class="u-txt"><b>Serie mensual por unidad minera (opcional)</b><p>Cuadros Estadísticos Mineros del MINEM (hoja del mineral seleccionado: <span class="mono" id="curMinName">cobre</span>) o un <span class="mono">data.json</span>. Lo nacional ya viene en vivo del BCRP.</p></div>
-    <button class="btn ghost sm" id="pickBtn">Cargar por unidad (.xlsx)</button>
-    <button class="btn ghost sm" id="helpBtn">Fuentes</button>
-    <input type="file" id="file" accept=".xlsx,.xls,.json" hidden>
+    <div class="u-txt"><b>Actualizar al último mes — un clic</b><p>Carga <span class="mono">producción-de-cobre-mina-por-empresa-mensual.xlsx</span> (Cochilco › Histórico Producción de Cobre y Molibdeno). Reemplaza todo por la serie oficial completa: ~60 faenas, mensual, desde el inicio. Procesado local.</p></div>
+    <button class="btn" id="pickBtn">Actualizar (.xlsx)</button>
+    <button class="btn ghost sm" id="autoBtn">Auto / GitHub</button>
+    <input type="file" id="file" accept=".xlsx,.xls" hidden>
+    <span class="u-status ok" id="ustatus">✓ datos cargados</span>
   </div>
 
   <div class="kpis" id="kpis"></div>
 
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" aria-selected="true" data-p="evo">Evolución mensual</button>
-    <button class="tab" role="tab" aria-selected="false" data-p="prod">Por empresa / mina</button>
-    <button class="tab" role="tab" aria-selected="false" data-p="reg">Regiones</button>
+    <button class="tab" role="tab" aria-selected="true" data-p="mine">Por mina</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="cap">Capstone (CSC.AX)</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="rank">Ranking &amp; YoY</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="nat">Nacional</button>
   </div>
 
-  <!-- EVOLUCION MENSUAL (national, BCRP) -->
-  <section class="panel active" id="panel-evo">
-    <div class="card">
-      <div class="hd"><h2 id="evoTitle">Producción nacional mensual</h2><div class="grow"></div>
-        <button class="btn ghost sm" id="reloadBtn" title="Reintentar consulta en vivo al BCRP">↻ En vivo</button>
-        <div class="seg" id="evoModeSeg" role="group"><button data-mode="historic" aria-pressed="true">Histórico</button><button data-mode="seasonal" aria-pressed="false">Estacional</button></div>
-        <div class="yearchips hide" id="evoYears"></div>
+  <section class="panel active" id="panel-mine">
+    <div class="split">
+      <div class="card">
+        <div class="hd"><h2 id="listTitle">Faenas</h2><span class="meta" id="mineCount">—</span><div class="grow"></div><div class="seg sm" id="groupSeg" role="group" aria-label="Agrupar por"><button data-g="faena" aria-pressed="true">Faena</button><button data-g="empresa" aria-pressed="false">Empresa</button></div></div>
+        <div class="minelist" id="minelist"><input class="search" id="msearch" placeholder="Buscar faena…" aria-label="Buscar faena"><div id="mineRows"></div></div>
       </div>
-      <div class="bd">
-        <div class="chart-h" id="evoWrap"><canvas id="evoChart" style="display:none"></canvas>
-          <div class="empty" id="evoEmpty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-7"/></svg><b id="evoEmptyT">Cargando serie mensual del BCRP…</b><p id="evoEmptyP">Producción nacional mensual del mineral, fuente Banco Central (INEI/MINEM).</p></div>
+      <div class="card">
+        <div class="hd">
+          <h2 id="mineTitle">—</h2><span class="meta" id="mineMeta"></span>
+          <div class="grow"></div>
+          <div class="seg" id="modeSeg" role="group" aria-label="Vista">
+            <button data-mode="seasonal" aria-pressed="true">Estacional</button>
+            <button data-mode="historic" aria-pressed="false">Histórico</button>
+          </div>
+          <div class="yearchips" id="yearchips"></div>
         </div>
-        <div class="note" id="evoNote"></div>
+        <div class="bd">
+          <div class="chart-h" id="mineChartWrap">
+            <canvas id="mineChart" style="display:none"></canvas>
+            <div class="empty" id="mineEmpty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-7"/></svg>
+              <b id="emptyTitle">Selecciona una faena</b>
+              <p id="emptyMsg">Las dos faenas de Capstone traen serie mensual. Para mensual del resto, carga el Excel oficial (botón Actualizar).</p>
+              <a id="emptyAction" style="display:none">Ver vista histórica →</a>
+            </div>
+          </div>
+          <div class="note" id="mineNote"></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- POR EMPRESA / MINA -->
-  <section class="panel" id="panel-prod">
+  <section class="panel" id="panel-cap">
+    <div class="card">
+      <div class="hd"><h2>Capstone Copper — producción por faena</h2><span class="meta">cifras oficiales Capstone</span></div>
+      <div class="bd" style="overflow:auto">
+        <table class="dt" id="capTable"><thead><tr><th>Faena</th><th>País</th><th>Q1 2026 (kt)</th><th>FY2025 (kt)</th><th>FY2024 (kt)</th><th>YoY FY</th><th>Nota</th></tr></thead><tbody></tbody></table>
+        <div class="note"><b>Solo Mantoverde y Mantos Blancos están en Chile</b> — y por tanto en Cochilco. Pinto Valley (Arizona) y Cozamin (México) se muestran aquí para el cuadro completo de CSC.AX, pero no en el resto del tablero. Guía 2026 consolidada: 200–230 kt; Mantoverde 89–102 kt. <span class="pill ok">Capstone Q1'26 / FY25</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-rank">
     <div class="card" style="margin-bottom:16px">
-      <div class="hd"><h2 id="prodTitle">Principales productores</h2><div class="grow"></div><span class="meta" id="prodAsof"></span><button class="btn ghost sm" id="csvBtn">Exportar CSV</button></div>
-      <div class="bd"><div id="prodBars"></div><div class="note" id="prodNote"></div></div>
+      <div class="hd"><h2>Ranking de faenas — acumulado</h2><div class="grow"></div><div class="toolbar"><span class="meta" id="rankPeriod">ene–abr 2026</span><button class="btn ghost sm" id="csvBtn">Exportar CSV</button></div></div>
+      <div class="bd"><div id="rankBars"></div><div class="note" id="rankNote">Faenas con dato del cuatrimestre (Cochilco vía prensa) + Mantoverde/Mantos Blancos. El ranking completo (Centinela, El Abra, Zaldívar, Antucoya, etc.) se construye al cargar el Excel. <span class="pill" style="background:rgba(91,143,185,.15);border-color:rgba(91,143,185,.4);color:#8FB6D6">azul = Capstone</span></div></div>
     </div>
     <div class="card">
-      <div class="hd"><h2>Mensual por unidad minera</h2><div class="grow"></div><div class="seg" id="mineModeSeg" role="group"><button data-mode="historic" aria-pressed="true">Histórico</button><button data-mode="seasonal" aria-pressed="false">Estacional</button></div></div>
-      <div class="bd"><div class="split">
-        <div class="minelist" id="minelist" style="display:none"><input class="search" id="msearch" placeholder="Buscar unidad…"><div id="mineRows"></div></div>
-        <div style="grid-column:1/-1" id="mineCol">
-          <div class="chart-h" id="mineWrap"><canvas id="mineChart" style="display:none"></canvas>
-            <div class="empty" id="mineEmpty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-7"/></svg><b>Serie mensual por unidad: carga los Cuadros MINEM</b><p>El BCRP da el total nacional, no el desglose por empresa. Carga la hoja del mineral seleccionado (Cuadros Estadísticos del MINEM) o un data.json y verás cada unidad minera mes a mes.</p></div>
-          </div><div class="note" id="mineNote"></div>
-        </div>
-      </div></div>
+      <div class="hd"><h2>Variación interanual (YoY) por faena</h2><span class="meta">acumulado ene–abr · 2026 vs 2025</span></div>
+      <div class="bd" style="overflow:auto"><table class="dt" id="yoyTable"><thead><tr><th>Faena / agrupación</th><th>2026 (kt)</th><th>2025 (kt)</th><th>Δ kt</th><th>YoY</th></tr></thead><tbody></tbody></table></div>
     </div>
   </section>
 
-  <!-- REGIONES -->
-  <section class="panel" id="panel-reg">
-    <div class="card"><div class="hd"><h2 id="regTitle">Producción por región</h2><div class="grow"></div><span class="meta" id="regAsof"></span></div>
-      <div class="bd"><div id="regBars"></div><div class="note" id="regNote"></div></div></div>
+  <section class="panel" id="panel-nat">
+    <div class="card">
+      <div class="hd"><h2>Producción nacional de cobre de mina</h2><div class="grow"></div><div class="seg" id="natModeSeg" role="group"><button data-mode="seasonal" aria-pressed="true">Estacional</button><button data-mode="historic" aria-pressed="false">Histórico</button></div><div class="yearchips" id="yearchipsNat"></div></div>
+      <div class="bd">
+        <div class="chart-h" id="natChartWrap">
+          <canvas id="natChart" style="display:none"></canvas>
+          <div class="empty" id="natEmpty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-7"/></svg><b>Serie nacional mensual al cargar el Excel</b><p>Abajo, el histórico anual nacional verificado.</p></div>
+        </div>
+        <div class="note"><b>Nacional (Cochilco):</b> 2024 <b>5.505,9 kt</b> · 2025 <b>5.415,3 kt</b> (−1,6%) · ene–abr 2026 <b>1.613,9 kt</b> (−8% YoY). El Histórico anual está disponible siempre; el mensual, al cargar el Excel. <span class="pill">Cochilco</span></div>
+      </div>
+    </div>
   </section>
 
   <footer>
-    <b>Fuentes.</b> Serie mensual nacional: <b>BCRPData</b> (Banco Central de Reserva del Perú), Minería Metálica por mineral — fuente original INEI / MINEM — consultada en vivo vía su API REST (códigos PN01873AM cobre, PN01876AM oro, PN01877AM plata, PN01879AM zinc, etc.; ene-2000→último mes publicado). Detalle por unidad minera: Cuadros Estadísticos Mineros del MINEM (Boletín Estadístico Minero). Participaciones por empresa/región: MINEM/BEM vía prensa (cierre 2025; cobre ene-2026).<br>
-    <b>Notas.</b> Unidades del BCRP: cobre, zinc, plomo, estaño, hierro y molibdeno en miles de TMF (kt); oro y plata en kg → mostrados en t finas. Si el navegador bloquea la API del BCRP por CORS, el tablero usa puntos mensuales de respaldo (prensa MINEM) y lo indica arriba. Volúmenes por empresa = participación × total (derivado).<br>
-    <b>Tablero · Inversiones Adriana.</b> Procesamiento local (Chart.js + SheetJS).
+    <b>Fuentes.</b> Cochilco — Tabla 17 “Producción Chilena de Cobre de Mina por Empresa” (anual y mensual); acumulado ene–abr 2026 y cierre 2025 vía prensa especializada (La Tercera/Pulso, DF, Consejo Minero/CESCO, Reporte Minero). Anuales por faena 2024–2025 de esa base. Capstone Copper: Q1 2026 (29-abr-2026) y producción récord 2025 (15-ene-2026).<br>
+    <b>Serie mensual Mantoverde/Mantos Blancos:</b> forma del gráfico Cochilco del informe CSC.AX que cargaste; niveles anclados a totales oficiales Capstone (2024/2025 al anual; dic-25 MV 10,7 kt; Q4 MB 16,9 kt; 2026 al Q1 oficial). Años 2021–2023 estimación visual <span class="pill est">est.</span> El resto de faenas trae anual 2024–2025 + acumulado 2026 (sin mensual hasta cargar el Excel). <b>El dato exacto y completo proviene del Excel de Cochilco.</b><br>
+    <b>Tablero · Inversiones Adriana.</b> Procesamiento local (Chart.js + SheetJS). Unidades kt (miles de toneladas de cobre fino).
   </footer>
 </div>
 
-<div class="modal" id="helpModal"><div class="box"><div class="hd"><h2 style="font-family:Space Grotesk;font-size:15px;margin:0">Fuentes y actualización</h2><button class="btn ghost sm" id="helpClose">Cerrar</button></div>
-  <div class="bd">
-    <h3>Evolución mensual nacional — BCRP en vivo</h3>
-    <p>El tablero llama a la API de BCRPData al abrir y trae la producción mensual por mineral (2000→último mes). Se actualiza solo cuando el BCRP publica. Si tu red/navegador bloquea la API (CORS), verás puntos de respaldo y un aviso en rojo arriba; en ese caso usa la opción de archivo.</p>
-    <h3 style="margin-top:14px">Detalle por unidad minera — MINEM</h3>
-    <p>MINEM › Boletín Estadístico Minero › <b>Cuadros Estadísticos Mineros (Avance Mensual)</b>. Selecciona el mineral, pulsa “Cargar por unidad” y elige la hoja de ese metal. Detecta unidad/años/meses y auto-escala. También acepta un <span class="mono">data.json</span> multimineral.</p>
-    <pre>{ "minerals": { "Cobre": { "unit":"kt",
-   "mines": { "Antamina": {"2025":[...12]}, ... } } } }</pre>
+<div class="modal" id="mapModal"><div class="box">
+  <div class="hd"><h2 style="font-family:Space Grotesk;font-size:15px;margin:0">Mapeo manual del Excel</h2><button class="btn ghost sm" id="mapClose">Cerrar</button></div>
+  <div class="bd"><p style="margin-top:0">No detecté la estructura automáticamente. Indica dónde están los encabezados:</p>
+    <div class="preview" id="mapPreview"></div>
+    <div class="mapgrid"><div><label>Hoja</label><select id="mapSheet"></select></div><div><label>Columna con nombres de faena</label><select id="mapNameCol"></select></div><div><label>Fila con los AÑOS</label><select id="mapYearRow"></select></div><div><label>Fila con los MESES</label><select id="mapMonthRow"></select></div></div>
+    <p style="margin:0 0 12px">Si los encabezados son fechas (p.ej. <span class="mono">ene-21</span>) en una sola fila, selecciónala en AÑOS y en MESES.</p>
+    <button class="btn" id="mapApply">Aplicar mapeo</button>
   </div>
 </div></div>
 
-<div class="modal" id="mapModal"><div class="box"><div class="hd"><h2 style="font-family:Space Grotesk;font-size:15px;margin:0">Mapeo manual</h2><button class="btn ghost sm" id="mapClose">Cerrar</button></div>
-  <div class="bd"><p style="margin-top:0">No detecté la estructura (se carga al mineral <b id="mapMin">cobre</b>):</p><div class="preview" id="mapPreview"></div>
-    <div class="mapgrid"><div><label>Hoja</label><select id="mapSheet"></select></div><div><label>Columna de unidad</label><select id="mapNameCol"></select></div><div><label>Fila de AÑOS</label><select id="mapYearRow"></select></div><div><label>Fila de MESES</label><select id="mapMonthRow"></select></div></div>
-    <button class="btn" id="mapApply">Aplicar</button>
+<div class="modal" id="autoModal"><div class="box">
+  <div class="hd"><h2 style="font-family:Space Grotesk;font-size:15px;margin:0">Actualización automática — “un clic”</h2><button class="btn ghost sm" id="autoClose">Cerrar</button></div>
+  <div class="bd">
+    <h3>Opción A — Manual (ya funciona)</h3>
+    <p>Botón <b>Actualizar (.xlsx)</b> → eliges el archivo recién bajado de Cochilco → todo el tablero se recalcula al último mes. Cero configuración.</p>
+    <h3 style="margin-top:14px">Opción B — Automática en GitHub Pages (como tus otras apps)</h3>
+    <p>El tablero ya intenta leer un <span class="mono">data.json</span> junto al HTML al abrir. Una GitHub Action baja el Excel de Cochilco cada mes, lo convierte a <span class="mono">data.json</span> y lo commitea. Actualizar = automático (o “Run workflow”, un clic). Incluí dos archivos en la entrega:</p>
+    <p>• <span class="mono">actualizar_cochilco.py</span> — descarga el Excel y genera <span class="mono">data.json</span>.<br>• <span class="mono">.github/workflows/actualizar_cochilco.yml</span> — corre mensual + manual y commitea.</p>
+    <p style="color:var(--muted-2)">Súbelos al repo del dashboard. El navegador no puede bajar Cochilco directo (CORS); por eso la descarga la hace la Action en el servidor y el tablero solo lee el JSON same-origin.</p>
   </div>
 </div></div>
 
 <script>
 "use strict";
 const MONTHS=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-const fmt=(x,d=1)=>(x==null||isNaN(x))?'—':Number(x).toLocaleString('es-PE',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fmtPct=x=>(x==null||isNaN(x))?'—':(x>0?'+':'')+x.toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';
-const chip=y=>`<span class="chip ${y>=0?'up':'dn'}">${fmtPct(y)}</span>`;
+const YEAR_COLORS={2021:'--y2021',2022:'--y2022',2023:'--y2023',2024:'--y2024',2025:'--y2025',2026:'--y2026'};
 const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt=(x,d=1)=>(x==null||isNaN(x))?'—':Number(x).toLocaleString('es-CL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtPct=x=>(x==null||isNaN(x))?'—':(x>0?'+':'')+x.toLocaleString('es-CL',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';
+const chip=y=>`<span class="chip ${y>=0?'up':'dn'}">${fmtPct(y)}</span>`;
 
-/* ===== mineral metadata (BCRP code, unit, color, producers, regions) ===== */
-const META={
-  Cobre:{code:'PN01873AM',unit:'kt',color:'--m-cu',div:1,
-    prodAsof:'participación ene 2026 (MINEM)',prod:[['Antamina',16.9,0],['Las Bambas',16.4,0],['Cerro Verde',14.4,0],['Southern (Cuajone+Toquepala)',12.0,1],['Quellaveco (Anglo American)',9.0,1],['Antapaccay',6.0,1],['Constancia (Hudbay)',5.0,1],['Toromocho (Chinalco)',5.0,1],['Mina Justa (Marcobre)',4.0,1]],
-    reg:[['Moquegua',17.2],['Arequipa',14.9],['Apurímac',14.8],['Áncash',14.6]]},
-  Oro:{code:'PN01876AM',unit:'t',color:'--m-au',div:1000,
-    prodAsof:'participación 2025 (MINEM)',prod:[['Yanacocha',14.7,0],['Poderosa',7.9,0],['Boroo Misquichilca',5.4,0],['Buenaventura',5.0,1],['Ares',4.0,1],['Pan American (Shahuindo/La Arena)',4.0,1],['Otros (incl. artesanal)',55.0,1]],
-    reg:[['La Libertad',27.9],['Cajamarca',23.9],['Arequipa',21.5]]},
-  Plata:{code:'PN01877AM',unit:'t',color:'--m-ag',div:1000,
-    prodAsof:'participación 2025 (MINEM)',prod:[['Antamina',15.4,0],['Buenaventura',11.0,0],['Chinalco',6.2,0],['Volcan',5.5,0],['Southern',4.7,0]],
-    reg:[['Áncash',20.5],['Lima',16.0,1],['Pasco',14.0,1]]},
-  Zinc:{code:'PN01879AM',unit:'kt',color:'--m-zn',div:1,
-    prodAsof:'participación 2025 (MINEM)',prod:[['Antamina',30.0,1],['Volcan',11.0,0],['Nexa Resources Perú',7.8,0],['Shouxin Perú',7.7,0],['Chungar',4.0,0],['Nexa El Porvenir',3.9,0]],
-    reg:[['Áncash',28.8],['Junín',15.6],['Lima',13.4],['Ica',11.3]]},
-  Plomo:{code:'PN01878AM',unit:'kt',color:'--m-pb',div:1,prodAsof:'',prod:[],reg:[]},
-  'Estaño':{code:'PN01874AM',unit:'kt',color:'--m-sn',div:1,prodAsof:'',prod:[],reg:[]},
-  Hierro:{code:'PN01875AM',unit:'kt',color:'--m-fe',div:1,prodAsof:'',prod:[],reg:[]},
-  Molibdeno:{code:'PN01880AM',unit:'kt',color:'--m-mo',div:1,prodAsof:'',prod:[],reg:[]}
+/* ===== Monthly series (kt) — Capstone: shape from Cochilco chart, levels anchored to official totals ===== */
+const MONTHLY_SEED={
+  'Mantoverde (Capstone)':{2021:[3.2,3.5,3.8,4.0,4.2,4.4,4.6,4.8,4.6,4.7,4.6,5.0],2022:[4.1,4.0,4.3,4.5,4.2,3.8,3.5,3.2,3.0,3.3,3.4,3.5],2023:[3.3,2.7,2.9,2.6,2.5,2.7,2.9,3.0,3.1,3.3,3.5,3.7],2024:[3.3,2.8,3.0,2.9,3.5,4.5,5.1,5.2,6.9,6.2,6.4,7.9],2025:[8.9,6.3,7.7,7.3,8.5,9.6,7.7,8.9,6.3,5.9,7.2,10.7],2026:[4.7,6.4,7.9,8.5,null,null,null,null,null,null,null,null]},
+  'Mantos Blancos (Capstone)':{2021:[4.3,3.1,4.0,4.5,4.0,3.8,3.5,4.0,4.5,3.5,3.8,3.9],2022:[3.6,3.8,3.7,4.0,3.9,3.6,4.0,5.2,4.5,4.0,4.5,5.0],2023:[4.5,5.0,5.1,4.7,4.5,4.0,3.8,4.2,4.0,3.7,3.1,4.0],2024:[3.7,3.9,3.3,4.1,3.8,3.3,2.3,3.9,4.3,4.0,3.7,4.2],2025:[4.9,4.7,4.8,4.8,4.9,4.7,4.4,5.2,6.5,5.6,5.3,6.0],2026:[4.5,3.9,3.9,4.2,null,null,null,null,null,null,null,null]}
 };
-/* fallback monthly points (kt) if BCRP/CORS fails — real MINEM/press figures (some MoM-derived) */
-const FALLBACK={
-  Cobre:{2024:{11:262.5},2025:{8:241.0,9:248.2,10:216.4,11:256.6},2026:{0:226.3,1:223.3}},
-  Plata:{2025:{11:337.0},2026:{0:286.0}},
-  Oro:{2026:{0:8.8}}
-};
+const EST_YEARS={2021:true,2022:true,2023:true};
+
+/* ===== All major Chilean mines — annual (kt) 2024/2025 + YTD ene-abr 2026/2025 (real, sourced) ===== */
+const MINES=[];
+MINES.push(
+  {n:'Escondida',o:'BHP',a24:1270,a25:1307,y26:412,y25:472},
+  {n:'Collahuasi',o:'Anglo/Glencore/Mitsui',a24:558,a25:406,y26:119,y25:117},
+  {n:'El Teniente',o:'Codelco',a24:null,a25:null,y26:79,y25:111},
+  {n:'Los Pelambres',o:'AMSA',a24:331,a25:306,y26:90,y25:98},
+  {n:'Chuqui + R.Tomic + M.Hales',o:'Codelco',a24:null,a25:null,y26:187,y25:199,der:true},
+  {n:'Andina',o:'Codelco',a24:181,a25:181,y26:57,y25:57.6,der:true},
+  {n:'Gabriela Mistral (Gaby)',o:'Codelco',a24:104,a25:82,y26:23,y25:25,der:true},
+  {n:'Salvador',o:'Codelco',a24:null,a25:null,y26:15,y25:9.6,der:true},
+  {n:'Spence',o:'BHP',a24:255,a25:null,y26:null,y25:null},
+  {n:'Quebrada Blanca (QB)',o:'Teck',a24:207,a25:190,y26:null,y25:null},
+  {n:'Los Bronces',o:'Anglo American',a24:null,a25:165,y26:null,y25:null},
+  {n:'Sierra Gorda',o:'KGHM/Sumitomo',a24:null,a25:165,y26:null,y25:null},
+  {n:'Candelaria',o:'Lundin',a24:142,a25:125,y26:null,y25:null},
+  {n:'Caserones',o:'Lundin',a24:null,a25:133,y26:null,y25:null},
+  {n:'Mantoverde (Capstone)',o:'Capstone',a24:57.6,a25:95.1,y26:27.5,y25:30.2,mo:true},
+  {n:'Mantos Blancos (Capstone)',o:'Capstone',a24:44.5,a25:61.9,y26:16.5,y25:19.2,mo:true}
+);
+const NAT={a24:5505.9,a25:5415.3,y26:1613.9,y25:1751.8};
+const CAPSTONE=[
+  {mine:'Mantoverde',pais:'Chile',q1:19.0,fy25:95.1,fy24:57.6,yoy:65,nota:'Récord recup. 90,3%; huelga 35d; guía 89–102 kt',chile:true},
+  {mine:'Mantos Blancos',pais:'Chile',q1:12.3,fy25:61.9,fy24:44.5,yoy:39,nota:'2026 menores leyes; Fase II PFS Q3 2026',chile:true},
+  {mine:'Pinto Valley',pais:'EE.UU. (AZ)',q1:10.7,fy25:42.4,fy24:null,yoy:null,nota:'Sequía en Arizona afectó throughput',chile:false},
+  {mine:'Cozamin',pais:'México',q1:5.9,fy25:25.3,fy24:null,yoy:null,nota:'Récord costo C1 $0,71/lb',chile:false}
+];
+const CAP_TOTAL={q1:48.0,fy25:224.8,yoy:22};
 
 /* ===== STATE ===== */
-let SEL='Cobre';
-let NAT={};            // mineral -> {year:[12]}  (BCRP national monthly, display units)
-let bcrpOk=false, bcrpRange='', bcrpVia='';
-let LOADED={};         // mineral -> by-unit {mines,national,years,latest}
-let evoMode='historic', mineMode='historic', activeMine=null, evoYears={};
-let evoChart=null, mineChart=null;
-const PAL=['#5B8FB9','#C99A2E','#9AA7B6','#4FA67C','#B084CC','#E5484D'];
-const isLoaded=m=>!!(LOADED[m]&&Object.keys(LOADED[m].mines).length);
-const hasNat=m=>!!(NAT[m]&&Object.keys(NAT[m]).length);
-function setMC(){document.documentElement.style.setProperty('--mc',cssv(META[SEL].color));document.documentElement.style.setProperty('--mcl',cssv(META[SEL].color));}
+let MONTHLY={mines:MONTHLY_SEED,years:[2021,2022,2023,2024,2025,2026],latest:{year:2026,month:3}};
+let official=false, activeMine=null, mineMode='seasonal', natMode='seasonal';
+let groupMode='faena', activeCompany=null, expandedCompany=null;
+let activeYears={}, mineChart=null, natChart=null;
+[2021,2022,2023,2024,2025,2026].forEach(y=>activeYears[y]=true);
 
-/* ===== BCRP live fetch (direct + CORS proxies in cascade) ===== */
-function parsePeriod(s){const t=String(s).trim().toLowerCase().replace('.',' ').replace('-',' ');const m=t.match(/([a-z]{3})\.?\s*(\d{4})/);const map={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,set:8,sep:8,oct:9,nov:10,dic:11};if(m&&map[m[1]]!=null)return{y:+m[2],mo:map[m[1]]};const d=t.match(/(\d{4})\s*(\d{1,2})/);if(d)return{y:+d[1],mo:+d[2]-1};return null;}
-const PROXIES=[
-  u=>u,
-  u=>`https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`,
-  u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-  u=>`https://thingproxy.freeboard.io/fetch/${u}`
+const mineEntry=n=>MINES.find(m=>m.n===n);
+const hasMonthly=n=>!!(MONTHLY.mines[n]);
+const sizeOf=m=>(m.a25!=null?m.a25:(m.y26!=null?m.y26:m.a24));
+/* ===== Company / owner segmentation ===== */
+const OWNER_RULES=[
+  [/escondida|spence|cerro colorado/i,'BHP'],
+  [/collahuasi/i,'Anglo/Glencore/Mitsui'],
+  [/teniente|chuquicamata|chuqui|radomiro|tomic|ministro hales|m\.?\s*hales|andina|salvador|gabriela|gaby|codelco|ventanas|el abra/i,'Codelco'],
+  [/los bronces|el soldado/i,'Anglo American'],
+  [/candelaria|ojos del salado|caser[oó]nes|lundin/i,'Lundin'],
+  [/pelambres|centinela|antucoya|zald[ií]var|tesoro|esperanza|antofagasta|amsa/i,'AMSA / Antofagasta'],
+  [/quebrada blanca|qb|andacollo|teck/i,'Teck'],
+  [/sierra gorda|kghm|sumitomo/i,'KGHM/Sumitomo'],
+  [/mantoverde|mantos blancos|capstone/i,'Capstone'],
+  [/lomas bayas|altonorte|glencore/i,'Glencore']
 ];
-const PROXY_NAME=['directo','codetabs','allorigins','corsproxy','thingproxy'];
-function parseBCRP(j){
-  const mins=Object.keys(META);mins.forEach(m=>NAT[m]={});
-  let minY=9999,maxY=0,maxM=0;
-  (j.periods||[]).forEach(p=>{const pp=parsePeriod(p.name);if(!pp)return;const{y,mo}=pp;minY=Math.min(minY,y);if(y>maxY||(y===maxY&&mo>maxM)){maxY=y;maxM=mo;}
-    mins.forEach((m,i)=>{let v=p.values?p.values[i]:null;v=(v==null||v==='n.d.'||v==='')?null:parseFloat(String(v).replace(/,/g,''));if(v!=null&&!isNaN(v))v=v/META[m].div;else v=null;(NAT[m][y]=NAT[m][y]||Array(12).fill(null))[mo]=v;});});
-  bcrpRange=`${MONTHS[0]} ${minY}–${MONTHS[maxM]} ${maxY}`;
-  return Object.values(NAT).some(s=>Object.keys(s).length);
-}
-async function loadBCRP(){
-  const mins=Object.keys(META);const codes=mins.map(m=>META[m].code).join('-');
-  const direct=`https://estadisticas.bcrp.gob.pe/estadisticas/series/api/${codes}/json/2010-1/2026-12/esp`;
-  for(let i=0;i<PROXIES.length;i++){
-    setStatus(`Conectando con BCRPData (${PROXY_NAME[i]})…`,'load');
-    try{
-      const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),12000);
-      const r=await fetch(PROXIES[i](direct),{signal:ctrl.signal});
-      clearTimeout(to);
-      if(!r.ok)continue;
-      const txt=await r.text();let j;try{j=JSON.parse(txt);}catch(_){continue;}
-      if(j&&j.periods&&j.periods.length&&parseBCRP(j)){
-        bcrpOk=true;bcrpVia=PROXY_NAME[i];
-        setStatus(`BCRP en vivo · ${mins.length} minerales · ${bcrpRange}`+(i?` · vía ${bcrpVia}`:''),'ok');
-        return;
-      }
-    }catch(e){/* siguiente estrategia */}
-  }
-  // fallback
-  bcrpOk=false;Object.keys(FALLBACK).forEach(m=>{NAT[m]={};for(const y in FALLBACK[m]){NAT[m][y]=Array(12).fill(null);for(const mo in FALLBACK[m][y])NAT[m][y][mo]=FALLBACK[m][y][mo];}});
-  setStatus('BCRP no accesible (CORS/red) · respaldo MINEM parcial — usa “Cargar por unidad” o el script','err');
+function ownerOf(n){const me=mineEntry(n);if(me&&me.o)return me.o;for(const [re,o] of OWNER_RULES)if(re.test(n))return o;return 'Otras / sin clasificar';}
+function companyMembers(co){if(official)return Object.keys(MONTHLY.mines).filter(n=>ownerOf(n)===co);return MINES.filter(m=>m.o===co).map(m=>m.n);}
+function aggMonthly(members){const has=members.filter(n=>MONTHLY.mines[n]);if(!has.length)return null;const out={};MONTHLY.years.forEach(y=>{out[y]=Array(12).fill(null);has.forEach(n=>{const s=MONTHLY.mines[n][y];if(s)s.forEach((v,m)=>{if(v!=null)out[y][m]=(out[y][m]||0)+v;});});});return out;}
+function aggAnnualOf(members){const set=new Set(members);const r={a24:null,a25:null,y26:null};['a24','a25','y26'].forEach(k=>{let s=0,any=false;MINES.forEach(m=>{if(set.has(m.n)&&m[k]!=null){s+=m[k];any=true;}});r[k]=any?s:null;});return r;}
+function companyGroups(){const map={};const push=(o,obj)=>{(map[o]=map[o]||[]).push(obj);};
+  if(official){const yd=ytdRowsMonthly();const by={};yd.rows.forEach(r=>by[r.n]=r);Object.keys(MONTHLY.mines).forEach(n=>{const r=by[n]||{};push(ownerOf(n),{n,size:r.y26,c:r.y26,p:r.y25,yoy:r.yoy,mo:true,cap:/capstone/i.test(n)});});}
+  else{MINES.forEach(m=>{let c=null,p=null;if(m.y26!=null&&m.y25){c=m.y26;p=m.y25;}else if(m.a25!=null&&m.a24){c=m.a25;p=m.a24;}push(m.o,{n:m.n,size:sizeOf(m),c,p,yoy:(c!=null&&p)?((c-p)/p*100):null,mo:!!m.mo,cap:/capstone/i.test(m.n)});});}
+  return Object.keys(map).map(co=>{const mines=map[co].sort((a,b)=>(b.size||0)-(a.size||0));const size=mines.reduce((s,m)=>s+(m.size||0),0)||null;let C=0,P=0,ok=false;mines.forEach(m=>{if(m.c!=null&&m.p!=null){C+=m.c;P+=m.p;ok=true;}});return {company:co,mines,size,yoy:(ok&&P)?((C-P)/P*100):null};}).sort((a,b)=>(b.size||0)-(a.size||0));}
+function ytdRowsMonthly(){ // YTD for monthly-source mines
+  const yrs=MONTHLY.years,cur=Math.max(...yrs),prev=cur-1;
+  const upto=(MONTHLY.latest&&MONTHLY.latest.year===cur)?MONTHLY.latest.month+1:12;
+  const sum=(a,n)=>a?a.slice(0,n).reduce((x,y)=>x+(y||0),0):null;
+  return {cur,prev,upto,rows:Object.keys(MONTHLY.mines).map(m=>{const c=sum(MONTHLY.mines[m][cur],upto),p=sum(MONTHLY.mines[m][prev],upto);return{n:m,y26:c,y25:p,yoy:(c!=null&&p)?((c-p)/p*100):null};}).filter(r=>r.y26>0)};
 }
 
-/* ===== mineral selector + KPIs ===== */
-function renderMinerals(){
-  const el=document.getElementById('minerals');
-  el.innerHTML=Object.keys(META).map(name=>{const lm=latestOf(name);const sub=lm?`${MONTHS[lm.mo]} ${lm.y}: ${fmt(lm.v,lm.v<10?2:0)} ${META[name].unit}`:(bcrpOk?'sin dato':'');
-    return `<button class="mn" data-m="${name}" aria-pressed="${SEL===name}" style="--mcl:${cssv(META[name].color)}"><span class="dot"></span><span class="lab">${name}</span><span class="sub">${sub}</span></button>`;}).join('');
-  el.querySelectorAll('.mn').forEach(b=>b.onclick=()=>{SEL=b.dataset.m;activeMine=null;setMC();renderMinerals();renderAll();});
-}
-function latestOf(m){if(!hasNat(m))return null;const ys=Object.keys(NAT[m]).map(Number).sort((a,b)=>b-a);for(const y of ys){const arr=NAT[m][y];for(let mo=11;mo>=0;mo--)if(arr[mo]!=null)return{y,mo,v:arr[mo]};}return null;}
-function valAt(m,y,mo){return (NAT[m]&&NAT[m][y])?NAT[m][y][mo]:null;}
-function sumLast12(m){const lm=latestOf(m);if(!lm)return null;let s=0,n=0;let y=lm.y,mo=lm.mo;for(let k=0;k<12;k++){const v=valAt(m,y,mo);if(v!=null){s+=v;n++;}mo--;if(mo<0){mo=11;y--;}}return n>=6?s:null;}
-function sumPrev12(m){const lm=latestOf(m);if(!lm)return null;let s=0,n=0;let y=lm.y-1,mo=lm.mo;for(let k=0;k<12;k++){const v=valAt(m,y,mo);if(v!=null){s+=v;n++;}mo--;if(mo<0){mo=11;y--;}}return n>=6?s:null;}
+/* ===== KPIs ===== */
 function renderKPIs(){
-  const u=META[SEL].unit,k=document.getElementById('kpis');setMC();
-  const lm=latestOf(SEL);const yoyM=(lm&&valAt(SEL,lm.y-1,lm.mo)!=null)?((lm.v-valAt(SEL,lm.y-1,lm.mo))/valAt(SEL,lm.y-1,lm.mo)*100):null;
-  const s12=sumLast12(SEL),p12=sumPrev12(SEL);const yoy12=(s12!=null&&p12)?((s12-p12)/p12*100):null;
-  const top=META[SEL].prod&&META[SEL].prod.length?META[SEL].prod[0]:null;
-  const topVol=(top&&s12!=null)?s12*top[1]/100:null;
-  k.innerHTML=
-    card('Último mes',lm?fmt(lm.v,lm.v<10?2:0):'—',u,lm?`${MONTHS[lm.mo]} ${lm.y}`+(yoyM!=null?' · '+chip(yoyM)+' YoY':''):'sin dato','')
-    +card('Acum. 12 meses',s12!=null?fmt(s12,s12<100?1:0):'—',u,yoy12!=null?chip(yoy12)+' vs 12m previos':'móvil','')
-    +card('Variación mensual',lm&&valAt(SEL,lm.y,lm.mo-1>=0?lm.mo-1:11)!=null?'':'',  '', '', '')  // placeholder replaced below
-    +card('Mayor productor',top?top[0].split(' (')[0]:'—','',top?fmt(top[1],1)+'% nac.'+(topVol!=null?' · ~'+fmt(topVol,0)+' '+u+'/12m':''):'(carga MINEM)','');
-  // fix 3rd card (MoM)
-  let mom=null,momLab='—';
-  if(lm){let py=lm.y,pm=lm.mo-1;if(pm<0){pm=11;py--;}const pv=valAt(SEL,py,pm);if(pv!=null){mom=(lm.v-pv)/pv*100;momLab=`${MONTHS[pm]}→${MONTHS[lm.mo]}`;}}
-  const cards=k.querySelectorAll('.kpi');
-  cards[2].innerHTML=`<div class="ey">Variación mensual</div><div class="v">${mom!=null?fmtPct(mom):'—'}</div><div class="sub">${momLab} (MoM)</div>`;
+  const k=document.getElementById('kpis');
+  if(official){
+    const yd=ytdRowsMonthly(); const top=[...yd.rows].sort((a,b)=>b.y26-a.y26)[0];
+    const cur=Math.max(...MONTHLY.years),lm=MONTHLY.latest,natV=MONTHLY.national?MONTHLY.national[cur]?.[lm.month]:null;
+    k.innerHTML=card(`Líder ${MONTHS[0]}–${MONTHS[yd.upto-1]} ${cur}`,top?top.n.replace(' (Capstone)',''):'—','',top?fmt(top.y26,0)+' kt · '+chip(top.yoy):'','red')
+      +card('Faenas en archivo',String(Object.keys(MONTHLY.mines).length),'','Cochilco oficial','blue')
+      +card('Último mes',lm?MONTHS[lm.month]+' '+lm.year:'—','',natV!=null?fmt(natV,0)+' kt país':'serie mensual','green')
+      +card('País '+'ene–abr 2026',fmt(NAT.y26,1),'kt',chip(((NAT.y26-NAT.y25)/NAT.y25*100))+' YoY','red');
+    return;
+  }
+  k.innerHTML=card('Mantoverde · Q1 2026','19,0','kt','FY25 95,1 kt · '+chip(65)+' · huelga 35d','red')
+    +card('Mantos Blancos · Q1 2026','12,3','kt','FY25 61,9 kt · '+chip(39),'blue')
+    +card('País · 2025','5.415','kt','vs 5.506 (2024) · '+chip(-1.6),'green')
+    +card('País · ene–abr 2026',fmt(NAT.y26,1),'kt','vs 1.751,8 · '+chip(-8),'red');
 }
-function card(ey,v,u,sub){return `<div class="kpi"><div class="ey">${ey}</div><div class="v">${v}${u?`<small>${u}</small>`:''}</div><div class="sub">${sub}</div></div>`;}
+function card(ey,v,u,sub,acc){return `<div class="kpi ${acc||''}"><div class="ey">${ey}</div><div class="v">${v}${u?`<small>${u}</small>`:''}</div><div class="sub">${sub}</div></div>`;}
 
-/* ===== charts ===== */
-function baseOpts(unit){return {responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+/* ===== Capstone table ===== */
+function renderCapstone(){
+  const tb=document.querySelector('#capTable tbody');
+  tb.innerHTML=CAPSTONE.map(r=>{const cls=r.yoy>0?'up':(r.yoy<0?'dn':'na');const flag=r.chile?'<span class="pill ok">Chile</span>':'<span class="pill">fuera CL</span>';
+    return `<tr><td>${r.mine} ${flag}</td><td style="color:var(--muted)">${r.pais}</td><td class="mono">${fmt(r.q1,1)}</td><td class="mono">${fmt(r.fy25,1)}</td><td class="mono">${r.fy24!=null?fmt(r.fy24,1):'—'}</td><td class="mono"><span class="pn ${cls}">${fmtPct(r.yoy)}</span></td><td style="text-align:left;color:var(--muted);font-size:11.5px">${r.nota}</td></tr>`;}).join('')
+    +`<tr style="font-weight:600;background:rgba(217,138,71,.06)"><td>Total Capstone</td><td style="color:var(--muted)">—</td><td class="mono">${fmt(CAP_TOTAL.q1,1)}</td><td class="mono">${fmt(CAP_TOTAL.fy25,1)}</td><td class="mono">—</td><td class="mono"><span class="pn up">${fmtPct(CAP_TOTAL.yoy)}</span></td><td style="text-align:left;color:var(--muted);font-size:11.5px">Guía 2026: 200–230 kt</td></tr>`;
+}
+
+/* ===== Ranking + YoY (YTD ene-abr) ===== */
+function renderRanking(){
+  let rows,period,note;
+  if(official){const yd=ytdRowsMonthly();rows=[...yd.rows].sort((a,b)=>b.y26-a.y26);period=`${MONTHS[0]}–${MONTHS[yd.upto-1]} ${yd.cur} (Excel)`;note=`Acumulado desde el Excel oficial. ${rows.length} faenas.`;}
+  else{rows=MINES.filter(m=>m.y26!=null).map(m=>({n:m.n,y26:m.y26,y25:m.y25,yoy:(m.y26!=null&&m.y25)?((m.y26-m.y25)/m.y25*100):null})).sort((a,b)=>b.y26-a.y26);period='ene–abr 2026';note=document.getElementById('rankNote').innerHTML;}
+  document.getElementById('rankPeriod').textContent=period;document.getElementById('rankNote').innerHTML=note;
+  const max=Math.max(...rows.map(r=>r.y26));
+  document.getElementById('rankBars').innerHTML=rows.map(r=>{const cap=/capstone/i.test(r.n||'');return `<div class="barrow"><div class="lab" title="${r.n}">${r.n.replace(' (Capstone)',' (CSC)')}</div><div class="bartrack"><div class="barfill ${cap?'cap':''}" style="width:${r.y26/max*100}%"></div></div><div class="val"><b>${fmt(r.y26,0)}</b> kt ${r.yoy!=null?chip(r.yoy):''}</div></div>`;}).join('');
+  const tb=document.querySelector('#yoyTable tbody');
+  let trows=official?rows:[...rows,{n:'País (total nacional)',y26:NAT.y26,y25:NAT.y25,yoy:-8,grp:true}];
+  tb.innerHTML=trows.map(r=>{const d=(r.y26!=null&&r.y25!=null)?(r.y26-r.y25):null;const cls=r.yoy>0?'up':(r.yoy<0?'dn':'na');const me=mineEntry(r.n);const tag=(me&&me.der?'<span class="pill">der.</span>':'')+(/capstone/i.test(r.n)?'<span class="pill est">recons.</span>':'');const st=r.grp?'style="font-weight:600;background:rgba(217,138,71,.05)"':'';
+    return `<tr ${st}><td>${r.n.replace(' (Capstone)','')}${tag}</td><td class="mono">${fmt(r.y26,1)}</td><td class="mono">${fmt(r.y25,1)}</td><td class="mono">${d!=null?(d>0?'+':'')+fmt(d,1):'—'}</td><td class="mono"><span class="pn ${cls}">${fmtPct(r.yoy)}</span></td></tr>`;}).join('');
+}
+
+/* ===== Year chips ===== */
+function buildYearChips(){
+  const yrs=MONTHLY.years;
+  ['yearchips','yearchipsNat'].forEach(id=>{const el=document.getElementById(id);
+    el.innerHTML=yrs.map(y=>{const on=activeYears[y]!==false;return `<button class="yc" data-y="${y}" aria-pressed="${on}"><span class="sw" style="background:${cssv(YEAR_COLORS[y]||'--muted')}"></span>${y}</button>`;}).join('');
+    el.querySelectorAll('.yc').forEach(b=>b.onclick=()=>{const y=+b.dataset.y;activeYears[y]=!(activeYears[y]!==false);buildYearChips();drawMine();drawNat();});});
+  document.getElementById('yearchips').className='yearchips'+(mineMode==='historic'?' hide':'');
+  document.getElementById('yearchipsNat').className='yearchips'+(natMode==='historic'?' hide':'');
+}
+
+/* ===== Mine list ===== */
+function renderMineList(filter=''){
+  const rows=document.getElementById('mineRows');const f=(filter||'').toLowerCase();
+  if(groupMode==='empresa'){renderCompanyList(rows,f);return;}
+  let items;
+  if(official){const yd=ytdRowsMonthly();const by={};yd.rows.forEach(r=>by[r.n]=r);items=Object.keys(MONTHLY.mines).map(n=>({n,size:by[n]?.y26,yoy:by[n]?.yoy,cap:/capstone/i.test(n),mo:true,o:ownerOf(n)})).sort((a,b)=>(b.size||0)-(a.size||0));}
+  else{items=MINES.map(m=>({n:m.n,size:sizeOf(m),yoy:(m.y26!=null&&m.y25)?((m.y26-m.y25)/m.y25*100):((m.a25!=null&&m.a24)?((m.a25-m.a24)/m.a24*100):null),cap:/capstone/i.test(m.n),mo:!!m.mo,o:m.o})).sort((a,b)=>(b.size||0)-(a.size||0));}
+  rows.innerHTML=items.filter(i=>i.n.toLowerCase().includes(f)||(i.o||'').toLowerCase().includes(f)).map(i=>{const cls=i.yoy>0?'up':(i.yoy<0?'dn':'na');
+    return `<div class="mrow" role="button" tabindex="0" aria-current="${activeMine===i.n}" data-m="${encodeURIComponent(i.n)}"><div class="nm">${i.n.replace(' (Capstone)','')}${i.o?` <small>${i.o}</small>`:''}</div>${i.mo?'<span class="tag mo">mens</span>':''}${i.cap?'<span class="tag">CSC</span>':''}<div class="vt">${i.size!=null?fmt(i.size,0)+' kt':''}</div><div class="yo ${cls}">${i.yoy!=null?fmtPct(i.yoy):''}</div></div>`;}).join('')||noHit();
+  bindRows(rows);
+  document.getElementById('mineCount').textContent=`${items.length} faenas`+(official?'':' · +Excel = ~60');
+}
+function noHit(){return `<div style="padding:16px;color:var(--muted);font-size:12.5px">Sin coincidencias.</div>`;}
+function bindRows(rows){
+  rows.querySelectorAll('.mrow[data-m]').forEach(r=>{const sel=()=>selectMine(decodeURIComponent(r.dataset.m));r.onclick=sel;r.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();sel();}};});
+  rows.querySelectorAll('.mrow[data-c]').forEach(r=>{const c=decodeURIComponent(r.dataset.c);const sel=()=>{expandedCompany=(expandedCompany===c?null:c);selectCompany(c);};r.onclick=sel;r.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();sel();}};});
+}
+function renderCompanyList(rows,f){
+  const groups=companyGroups();let html='';
+  groups.forEach(g=>{const matchCo=g.company.toLowerCase().includes(f);const mines=g.mines.filter(m=>matchCo||m.n.toLowerCase().includes(f));if(!mines.length&&!matchCo)return;
+    const exp=(expandedCompany===g.company)||(!!f&&mines.length>0);const cls=g.yoy>0?'up':(g.yoy<0?'dn':'na');
+    html+=`<div class="mrow crow" role="button" tabindex="0" aria-current="${activeCompany===g.company}" data-c="${encodeURIComponent(g.company)}"><span class="chev">${exp?'▾':'▸'}</span><div class="nm"><b>${g.company}</b> <small>${g.mines.length} faena${g.mines.length>1?'s':''}</small></div><div class="vt">${g.size!=null?fmt(g.size,0)+' kt':''}</div><div class="yo ${cls}">${g.yoy!=null?fmtPct(g.yoy):''}</div></div>`;
+    if(exp)mines.forEach(m=>{const mc=m.yoy>0?'up':(m.yoy<0?'dn':'na');html+=`<div class="mrow sub" role="button" tabindex="0" aria-current="${activeMine===m.n}" data-m="${encodeURIComponent(m.n)}"><div class="nm">${m.n.replace(' (Capstone)','')}</div>${m.mo?'<span class="tag mo">mens</span>':''}${m.cap?'<span class="tag">CSC</span>':''}<div class="vt">${m.size!=null?fmt(m.size,0)+' kt':''}</div><div class="yo ${mc}">${m.yoy!=null?fmtPct(m.yoy):''}</div></div>`;});
+  });
+  rows.innerHTML=html||noHit();bindRows(rows);
+  document.getElementById('mineCount').textContent=`${groups.length} empresas · ${groups.reduce((s,g)=>s+g.mines.length,0)} faenas`+(official?'':' · +Excel');
+}
+function selectMine(n){activeMine=n;activeCompany=null;renderMineList(document.getElementById('msearch').value);drawMine();}
+function selectCompany(c){activeCompany=c;activeMine=null;renderMineList(document.getElementById('msearch').value);drawMine();}
+
+/* ===== Charts ===== */
+function seasonalDatasets(series){
+  const cur=Math.max(...MONTHLY.years);
+  return MONTHLY.years.filter(y=>activeYears[y]!==false).map(y=>{const col=cssv(YEAR_COLORS[y]||'--muted');const isCur=y===cur;const est=EST_YEARS[y]&&!official;
+    return {label:String(y)+(est?' ·est':''),data:(series[y]||[]).map(v=>v==null?null:v),borderColor:col,backgroundColor:col,borderWidth:isCur?3:1.6,pointRadius:isCur?3:0,pointHoverRadius:5,borderDash:est?[5,3]:[],tension:.28,spanGaps:true,order:isCur?0:1};});
+}
+function histMonthly(series){
+  const yrs=Object.keys(series).map(Number).sort((a,b)=>a-b);let L=[],V=[];
+  yrs.forEach(y=>{for(let m=0;m<12;m++){L.push(MONTHS[m]+" '"+String(y).slice(2));V.push(series[y][m]==null?null:series[y][m]);}});
+  let s=V.findIndex(v=>v!=null);let e=V.length-1-[...V].reverse().findIndex(v=>v!=null);
+  return {labels:L.slice(s,e+1),vals:V.slice(s,e+1)};
+}
+function histAnnual(m){
+  const L=[],V=[];
+  if(m.a24!=null){L.push('2024');V.push(m.a24);}
+  if(m.a25!=null){L.push('2025');V.push(m.a25);}
+  if(m.y26!=null){L.push("2026·e-a");V.push(m.y26);}
+  if(L.length<=1){L.length=0;V.length=0;if(m.y25!=null){L.push("2025·e-a");V.push(m.y25);}if(m.y26!=null){L.push("2026·e-a");V.push(m.y26);}}
+  return {labels:L,vals:V};
+}
+const baseOpts=(unit,xTitle)=>({responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
   plugins:{legend:{display:true,labels:{color:cssv('--muted'),font:{family:'JetBrains Mono',size:11},usePointStyle:true,pointStyle:'line'}},
     tooltip:{backgroundColor:'#0A1521',borderColor:cssv('--line'),borderWidth:1,titleColor:cssv('--ink'),bodyColor:cssv('--ink'),padding:11,titleFont:{family:'Space Grotesk'},bodyFont:{family:'JetBrains Mono',size:12},callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y==null?'s/d':fmt(c.parsed.y,1)+' '+unit}`}}},
   scales:{x:{grid:{color:cssv('--line-soft')},ticks:{color:cssv('--muted'),font:{family:'JetBrains Mono',size:10},autoSkip:true,maxTicksLimit:16}},
-    y:{grid:{color:cssv('--line-soft')},ticks:{color:cssv('--muted'),font:{family:'JetBrains Mono',size:11},callback:v=>fmt(v,0)},title:{display:true,text:unit,color:cssv('--muted-2'),font:{family:'JetBrains Mono',size:10}}}}};}
-function yearsOf(series){return Object.keys(series).map(Number).sort((a,b)=>a-b);}
-function seasonalDatasets(series){const yrs=yearsOf(series).filter(y=>evoYears[y]!==false);const cur=Math.max(...yearsOf(series));
-  return yrs.map((y,i)=>{const isCur=y===cur;const c=isCur?cssv('--mc'):PAL[(yrs.length-1-i)%PAL.length];const arr=(series[y]||[]).map(v=>v==null?null:v);const filled=arr.filter(v=>v!=null).length;
-    return {label:String(y),data:arr,borderColor:c,backgroundColor:c,borderWidth:isCur?3:1.6,pointRadius:isCur?3:(filled<8?3:0),pointBackgroundColor:c,pointHoverRadius:5,tension:.28,spanGaps:true,showLine:filled>=2,order:isCur?0:1};});}
-function histSeries(series){const yrs=yearsOf(series);let L=[],V=[];yrs.forEach(y=>{for(let mo=0;mo<12;mo++){L.push(MONTHS[mo]+" '"+String(y).slice(2));V.push(series[y][mo]==null?null:series[y][mo]);}});let s=V.findIndex(v=>v!=null),e=V.length-1-[...V].reverse().findIndex(v=>v!=null);return {labels:L.slice(s,e+1),vals:V.slice(s,e+1)};}
-function buildEvoYears(series){const yrs=yearsOf(series);const keep=yrs.slice(-6);yrs.forEach(y=>{if(!(y in evoYears))evoYears[y]=keep.includes(y);});
-  const el=document.getElementById('evoYears');el.className='yearchips'+(evoMode==='historic'?' hide':'');
-  el.innerHTML=yrs.map(y=>`<button class="yc" data-y="${y}" aria-pressed="${evoYears[y]!==false}">${y}</button>`).join('');
-  el.querySelectorAll('.yc').forEach(b=>b.onclick=()=>{const y=+b.dataset.y;evoYears[y]=!(evoYears[y]!==false);drawEvo();});
-}
-function drawEvo(){
-  const cv=document.getElementById('evoChart'),em=document.getElementById('evoEmpty');
-  document.getElementById('evoModeSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===evoMode));
-  document.getElementById('evoTitle').textContent=`Producción nacional mensual de ${SEL.toLowerCase()}`;
-  if(!hasNat(SEL)){cv.style.display='none';em.style.display='flex';document.getElementById('evoEmptyT').textContent=bcrpOk?'Sin datos para este mineral':'BCRP no accesible';document.getElementById('evoNote').innerHTML='';return;}
-  const series=NAT[SEL];buildEvoYears(series);let data;
-  if(evoMode==='seasonal')data={labels:MONTHS,datasets:seasonalDatasets(series)};
-  else{const h=histSeries(series);const filled=h.vals.filter(v=>v!=null).length;const dense=filled/Math.max(1,h.vals.length)>=0.55;
-    data={labels:h.labels,datasets:[{label:META[SEL].unit,data:h.vals,borderColor:cssv('--mc'),backgroundColor:'rgba(217,138,71,.10)',borderWidth:2,showLine:dense,pointRadius:dense?0:4,pointBackgroundColor:cssv('--mc'),pointHoverRadius:5,tension:.2,fill:dense,spanGaps:dense}]};}
-  em.style.display='none';cv.style.display='block';
-  document.getElementById('evoNote').innerHTML=(evoMode==='seasonal'?`Estacionalidad: una línea por año (el último en color, grueso). `:`Línea de tiempo mensual continua. `)+(bcrpOk?`Fuente BCRP (INEI/MINEM), en vivo · ${bcrpRange}. <span class="pill ok">vivo</span>`:`Puntos de respaldo (prensa MINEM); BCRP no accesible. <span class="pill est">respaldo parcial</span>`);
-  if(evoChart)evoChart.destroy();evoChart=new Chart(cv,{type:'line',data,options:baseOpts(META[SEL].unit)});
-}
-
-/* producers / regions */
-function renderProd(){
-  const m=META[SEL];document.getElementById('prodTitle').textContent=`Principales productores de ${SEL.toLowerCase()}`;document.getElementById('prodAsof').textContent=m.prodAsof||'';document.getElementById('curMinName').textContent=SEL.toLowerCase();
-  const s12=sumLast12(SEL);
-  if(!m.prod.length){document.getElementById('prodBars').innerHTML=`<div class="empty" style="height:110px"><p>Participación por empresa no sembrada para ${SEL}. El total nacional mensual sí está (pestaña Evolución). Carga los Cuadros MINEM para el desglose.</p></div>`;document.getElementById('prodNote').innerHTML='';return;}
-  const max=Math.max(...m.prod.map(p=>p[1]));
-  document.getElementById('prodBars').innerHTML=m.prod.map(p=>{const vol=(s12!=null)?s12*p[1]/100:null;
-    return `<div class="barrow"><div class="lab" title="${p[0]}">${p[0]}${p[2]===1?' <small>aprox.</small>':''}</div><div class="bartrack"><div class="barfill" style="width:${p[1]/max*100}%"></div></div><div class="val"><b>${fmt(p[1],1)}%</b>${vol!=null?` · ${fmt(vol,0)} ${m.unit}`:''}</div></div>`;}).join('');
-  document.getElementById('prodNote').innerHTML=`Participación (%) en la producción nacional (MINEM). Volumen ≈ participación × producción 12 meses <span class="pill est">der.</span>. ${m.prod.some(p=>p[2]===1)?'Algunas participaciones fuera del top‑3 son aprox. ':''}La serie mensual por unidad se activa cargando los Cuadros MINEM.`;
-}
-function renderReg(){
-  const m=META[SEL];document.getElementById('regTitle').textContent=`${SEL} por región (departamento)`;document.getElementById('regAsof').textContent=m.prodAsof?'2025 (MINEM)':'';
-  if(!m.reg.length){document.getElementById('regBars').innerHTML=`<div class="empty" style="height:110px"><p>Sin desglose regional sembrado para ${SEL}.</p></div>`;document.getElementById('regNote').innerHTML='';return;}
-  const max=Math.max(...m.reg.map(r=>r[1]));
-  document.getElementById('regBars').innerHTML=m.reg.map(r=>`<div class="barrow"><div class="lab">${r[0]}${r[2]===1?' <small>aprox.</small>':''}</div><div class="bartrack"><div class="barfill" style="width:${r[1]/max*100}%"></div></div><div class="val"><b>${fmt(r[1],1)}%</b></div></div>`).join('');
-  document.getElementById('regNote').innerHTML=`Participación regional (%) del total nacional de ${SEL.toLowerCase()} (MINEM, 2025).`;
-}
-
-/* by-unit (Cuadros MINEM upload) */
+    y:{grid:{color:cssv('--line-soft')},ticks:{color:cssv('--muted'),font:{family:'JetBrains Mono',size:11},callback:v=>fmt(v,0)},title:{display:true,text:unit,color:cssv('--muted-2'),font:{family:'JetBrains Mono',size:10}}}}});
 function drawMine(){
-  const cv=document.getElementById('mineChart'),em=document.getElementById('mineEmpty'),list=document.getElementById('minelist');
-  document.getElementById('mineModeSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mineMode));
-  if(!isLoaded(SEL)){cv.style.display='none';em.style.display='flex';list.style.display='none';document.getElementById('mineNote').innerHTML='';return;}
-  list.style.display='block';const L=LOADED[SEL];if(!activeMine||!L.mines[activeMine])activeMine=Object.keys(L.mines)[0];
-  renderMineList(document.getElementById('msearch')?document.getElementById('msearch').value:'');
-  const s=L.mines[activeMine];let data;
-  if(mineMode==='seasonal'){const yrs=yearsOf(s),cur=Math.max(...yrs);data={labels:MONTHS,datasets:yrs.map((y,i)=>{const isCur=y===cur;const c=isCur?cssv('--mc'):PAL[(yrs.length-1-i)%PAL.length];return{label:String(y),data:s[y]||[],borderColor:c,backgroundColor:c,borderWidth:isCur?3:1.5,pointRadius:isCur?3:0,tension:.28,spanGaps:true};})};}
-  else{const h=histSeries(s);data={labels:h.labels,datasets:[{label:META[SEL].unit,data:h.vals,borderColor:cssv('--mc'),backgroundColor:'rgba(217,138,71,.10)',borderWidth:2,pointRadius:0,tension:.2,fill:true,spanGaps:true}]};}
-  em.style.display='none';cv.style.display='block';document.getElementById('mineNote').innerHTML=`<b>${activeMine}</b> — mensual (${META[SEL].unit}). Fuente: Cuadros MINEM cargados.`;
-  if(mineChart)mineChart.destroy();mineChart=new Chart(cv,{type:'line',data,options:baseOpts(META[SEL].unit)});
+  const cv=document.getElementById('mineChart'),em=document.getElementById('mineEmpty');
+  const showEmpty=(t,m,act)=>{cv.style.display='none';em.style.display='flex';document.getElementById('emptyTitle').textContent=t;document.getElementById('emptyMsg').textContent=m;const a=document.getElementById('emptyAction');a.style.display=act?'inline':'none';};
+  document.getElementById('modeSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mineMode));
+  buildYearChips();
+  if(activeCompany&&!activeMine){drawCompany();return;}
+  if(!activeMine){showEmpty('Selecciona una faena o empresa','Elige una faena de la lista, o cambia a “Empresa” arriba y elige una compañía.',false);document.getElementById('mineTitle').textContent='—';document.getElementById('mineMeta').textContent='';document.getElementById('mineNote').textContent='';return;}
+  const me=mineEntry(activeMine); const mo=hasMonthly(activeMine);
+  document.getElementById('mineTitle').textContent=activeMine.replace(' (Capstone)','');
+  const cur=Math.max(...MONTHLY.years);
+  let data,opts,note;
+  if(mineMode==='seasonal'){
+    if(!mo){showEmpty('Sin serie mensual sembrada para esta faena','Esta faena trae solo dato anual. Carga el Excel oficial para su mensual, o mira la vista histórica.',true);document.getElementById('mineMeta').textContent=me?`2025: ${fmt(me.a25,0)} kt`:'';document.getElementById('mineNote').innerHTML='';return;}
+    data={labels:MONTHS,datasets:seasonalDatasets(MONTHLY.mines[activeMine])};opts=baseOpts('kt');
+    note=`Estacionalidad: producción mensual por año, ene–dic. <b>${cur}</b> en rojo grueso (como tu informe).`+(/capstone/i.test(activeMine)&&!official?` Serie reconstruida (forma gráfico Cochilco + niveles Capstone); 2021–2023 punteado = estimación. <span class="pill est">recons.</span>`:'');
+  }else{ // historic
+    if(mo){const h=histMonthly(MONTHLY.mines[activeMine]);data={labels:h.labels,datasets:[{label:'kt/mes',data:h.vals,borderColor:cssv('--copper'),backgroundColor:'rgba(217,138,71,.12)',borderWidth:2,pointRadius:0,pointHoverRadius:5,tension:.25,fill:true,spanGaps:true}]};opts=baseOpts('kt');note=`Histórico: línea de tiempo mensual continua desde el inicio.`+(/capstone/i.test(activeMine)&&!official?` <span class="pill est">recons.</span>`:'');}
+    else{if(!me){showEmpty('Sin datos','—',false);return;}const h=histAnnual(me);if(!h.vals.length){showEmpty('Sin serie histórica sembrada','Carga el Excel oficial para la serie completa.',false);return;}
+      data={labels:h.labels,datasets:[{label:'kt',data:h.vals,borderColor:cssv('--copper'),backgroundColor:'rgba(217,138,71,.12)',borderWidth:2,pointRadius:5,pointBackgroundColor:cssv('--copper'),pointHoverRadius:7,tension:.2,fill:true}]};opts=baseOpts('kt');
+      note=`Histórico anual (Cochilco/reportes). <b>2026 = acumulado ene–abr (parcial)</b>. Para la serie mensual completa desde 2021, carga el Excel oficial.`;}
+  }
+  const yd=official?ytdRowsMonthly():null; let metaTxt='';
+  if(mo){const arr=MONTHLY.mines[activeMine][cur]||[];const upto=arr.filter(v=>v!=null).length;const c=arr.slice(0,upto).reduce((x,y)=>x+(y||0),0);const p=(MONTHLY.mines[activeMine][cur-1]||[]).slice(0,upto).reduce((x,y)=>x+(y||0),0);metaTxt=`ene–${MONTHS[upto-1]} ${cur}: ${fmt(c,1)} kt · YoY ${p?fmtPct((c-p)/p*100):'—'}`;}
+  else if(me){metaTxt=`${me.o} · 2025 ${fmt(me.a25,0)} kt`+(me.y26!=null?` · e-a'26 ${fmt(me.y26,0)} kt`:'');}
+  document.getElementById('mineMeta').textContent=metaTxt;
+  document.getElementById('mineNote').innerHTML=note;
+  em.style.display='none';cv.style.display='block';
+  if(mineChart)mineChart.destroy();mineChart=new Chart(cv,{type:'line',data,options:opts});
 }
-function renderMineList(filter=''){const L=LOADED[SEL];if(!L)return;const rows=document.getElementById('mineRows');const cur=Math.max(...yearsOf(L.mines[Object.keys(L.mines)[0]]||{2025:[]}));const sum=a=>a?a.reduce((x,y)=>x+(y||0),0):0;const items=Object.keys(L.mines).map(n=>({n,v:sum(L.mines[n][cur])})).sort((a,b)=>b.v-a.v);const f=filter.toLowerCase();
-  rows.innerHTML=items.filter(i=>i.n.toLowerCase().includes(f)).map(i=>`<div class="mrow" role="button" tabindex="0" aria-current="${activeMine===i.n}" data-m="${encodeURIComponent(i.n)}"><div class="nm" title="${i.n}">${i.n}</div><div class="vt">${fmt(i.v,0)} ${META[SEL].unit}</div></div>`).join('');
-  rows.querySelectorAll('.mrow').forEach(r=>{const sel=()=>{activeMine=decodeURIComponent(r.dataset.m);drawMine();};r.onclick=sel;r.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sel();}};});}
+function drawCompany(){
+  const cv=document.getElementById('mineChart'),em=document.getElementById('mineEmpty');
+  const showEmpty=(t,m)=>{cv.style.display='none';em.style.display='flex';document.getElementById('emptyTitle').textContent=t;document.getElementById('emptyMsg').textContent=m;document.getElementById('emptyAction').style.display='none';};
+  document.getElementById('modeSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mineMode));
+  buildYearChips();
+  const members=companyMembers(activeCompany);const cur=Math.max(...MONTHLY.years);
+  document.getElementById('mineTitle').textContent=activeCompany;
+  const g=companyGroups().find(x=>x.company===activeCompany);
+  const upto=official?((MONTHLY.latest&&MONTHLY.latest.year===cur)?MONTHLY.latest.month+1:12):0;
+  document.getElementById('mineMeta').textContent=`${members.length} faena${members.length>1?'s':''}`+(g&&g.size!=null?` · ${fmt(g.size,0)} kt`+(official?` (ene–${MONTHS[upto-1]} ${cur})`:' (2025/acum.)')+(g.yoy!=null?` · YoY ${fmtPct(g.yoy)}`:''):'');
+  const aggM=aggMonthly(members);let data,opts,note;
+  if(aggM&&mineMode==='seasonal'){data={labels:MONTHS,datasets:seasonalDatasets(aggM)};opts=baseOpts('kt');note=`Suma mensual de ${members.filter(n=>MONTHLY.mines[n]).length} faena(s) de <b>${activeCompany}</b> con serie mensual. <b>${cur}</b> en rojo grueso. Toca una faena abajo para ver el detalle individual.`;}
+  else if(aggM){const h=histMonthly(aggM);data={labels:h.labels,datasets:[{label:'kt/mes',data:h.vals,borderColor:cssv('--copper'),backgroundColor:'rgba(217,138,71,.12)',borderWidth:2,pointRadius:0,pointHoverRadius:5,tension:.25,fill:true,spanGaps:true}]};opts=baseOpts('kt');note=`Suma mensual de las faenas de <b>${activeCompany}</b> (línea de tiempo continua). Toca una faena abajo para su detalle.`;}
+  else{const ag=aggAnnualOf(members);const L=[],V=[];if(ag.a24!=null){L.push('2024');V.push(ag.a24);}if(ag.a25!=null){L.push('2025');V.push(ag.a25);}if(ag.y26!=null){L.push('2026·e-a');V.push(ag.y26);}
+    if(!V.length){showEmpty('Sin datos agregados','Carga el Excel oficial para la serie mensual por faena.');document.getElementById('mineNote').innerHTML='';return;}
+    data={type:'bar',labels:L,datasets:[{label:'kt',data:V,backgroundColor:cssv('--copper'),borderRadius:6,maxBarThickness:90}]};opts=baseOpts('kt');
+    note=`Agregado <b>anual</b> de las ${members.length} faenas de <b>${activeCompany}</b> (suma de cifras sembradas; 2026 = acum. ene–abr). Para la curva mensual por faena, carga el Excel oficial. Toca una faena abajo para ver su detalle.`;}
+  document.getElementById('mineNote').innerHTML=note;em.style.display='none';cv.style.display='block';
+  if(mineChart)mineChart.destroy();mineChart=new Chart(cv,{type:data.type||'line',data,options:opts});
+}
+function drawNat(){
+  const cv=document.getElementById('natChart'),em=document.getElementById('natEmpty');
+  document.getElementById('natModeSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===natMode));
+  buildYearChips();
+  if(natMode==='seasonal'){
+    if(!official||!MONTHLY.national){cv.style.display='none';em.style.display='flex';em.querySelector('b').textContent='Serie nacional mensual al cargar el Excel';return;}
+    em.style.display='none';cv.style.display='block';if(natChart)natChart.destroy();natChart=new Chart(cv,{type:'line',data:{labels:MONTHS,datasets:seasonalDatasets(MONTHLY.national)},options:baseOpts('kt')});return;
+  }
+  // historic
+  let labels,vals;
+  if(official&&MONTHLY.national){const h=histMonthly(MONTHLY.national);labels=h.labels;vals=h.vals;}
+  else{labels=['2024','2025','2026·e-a'];vals=[NAT.a24,NAT.a25,NAT.y26];}
+  em.style.display='none';cv.style.display='block';if(natChart)natChart.destroy();
+  natChart=new Chart(cv,{type:'line',data:{labels,datasets:[{label:'kt',data:vals,borderColor:cssv('--copper'),backgroundColor:'rgba(217,138,71,.12)',borderWidth:2,pointRadius:official?0:5,pointBackgroundColor:cssv('--copper'),pointHoverRadius:6,tension:.2,fill:true}]},options:baseOpts('kt')});
+}
 
-function renderAll(){setMC();renderKPIs();drawEvo();renderProd();renderReg();drawMine();}
-
-/* ===== status ===== */
-function setStatus(t,c){const e=document.getElementById('status');e.innerHTML='<span class="led"></span>'+t;e.className='status '+(c||'');}
-
-/* ===== XLSX (by-unit, attach to SEL) — same tolerant parser ===== */
+/* ===== XLSX parsing ===== */
+function setStatus(m,c){const e=document.getElementById('ustatus');e.textContent=m;e.className='u-status '+(c||'');}
 const isYear=v=>{const n=+v;return Number.isInteger(n)&&n>=2000&&n<=2035;};
-function monthIndex(v){if(v==null)return -1;if(typeof v==='number'&&v>=1&&v<=12)return v-1;const s=String(v).toLowerCase().trim();const mp={ene:0,enero:0,jan:0,feb:1,mar:2,marzo:2,abr:3,abril:3,apr:3,may:4,mayo:4,jun:5,junio:5,jul:6,julio:6,ago:7,agosto:7,aug:7,set:8,sep:8,septiembre:8,oct:9,octubre:9,nov:10,noviembre:10,dic:11,diciembre:11,dec:11};for(const k in mp){if(s.startsWith(k))return mp[k];}return -1;}
-function parseDH(v){if(v instanceof Date)return{year:v.getFullYear(),month:v.getMonth()};const s=String(v).trim();let m=s.match(/(20\d{2})[-\/.](\d{1,2})/);if(m)return{year:+m[1],month:+m[2]-1};m=s.match(/(\d{1,2})[-\/.](20\d{2})/);if(m)return{year:+m[2],month:+m[1]-1};m=s.match(/([a-záéí]{3,})[-\/.\s]*(\d{2,4})/i);if(m){const mi=monthIndex(m[1]);if(mi>=0){let y=+m[2];if(y<100)y+=2000;return{year:y,month:mi};}}return null;}
-function buildFromMap(aoa,nameCol,colMap,he){const mines={};const ys=new Set();for(let r=he+1;r<aoa.length;r++){const row=aoa[r];if(!row)continue;let name=row[nameCol];if(name==null)continue;name=String(name).trim();if(!name||isYear(name)||monthIndex(name)>=0)continue;if(/^(fuente|source|nota|total|elabor|\(|cuadro)/i.test(name))continue;const s={};let any=false;for(const c in colMap){let v=row[c];if(v==null||v==='')continue;if(typeof v==='string')v=v.replace(/\s/g,'').replace(/\./g,'').replace(',','.');v=parseFloat(v);if(isNaN(v))continue;const{year,month}=colMap[c];(s[year]=s[year]||Array(12).fill(null))[month]=v;any=true;ys.add(year);}if(any)mines[name]=s;}if(!Object.keys(mines).length)return null;
-  let mx=0;Object.values(mines).forEach(s=>Object.values(s).forEach(a=>a.forEach(v=>{if(v)mx=Math.max(mx,v);})));let sc=1;if(SEL==='Oro')sc=mx>50000?1/1e6:(mx>50?1/1000:1);else if(SEL==='Plata')sc=mx>20000?1/1000:1;else sc=mx>3000?1/1000:1;if(sc!==1){const f=s=>{for(const y in s)s[y]=s[y].map(v=>v==null?null:v*sc);};Object.values(mines).forEach(f);}
-  const years=[...ys].sort((a,b)=>a-b);return{mines,years};}
-function tryParse(aoa){if(!aoa||aoa.length<3)return null;const scan=Math.min(aoa.length,30);const mc=Math.max(...aoa.slice(0,scan).map(r=>r?r.length:0));let nameCol=0,bt=-1;for(let c=0;c<Math.min(mc,4);c++){let t=0;for(let r=5;r<aoa.length;r++){const v=aoa[r]?.[c];if(typeof v==='string'&&v.trim()&&isNaN(+v))t++;}if(t>bt){bt=t;nameCol=c;}}let yr=-1,yc=1;for(let r=0;r<scan;r++){const c=(aoa[r]||[]).filter(isYear).length;if(c>=2&&c>yc){yc=c;yr=r;}}let dr=-1,dc=5;for(let r=0;r<scan;r++){const row=aoa[r]||[];let d=0;for(let c=nameCol+1;c<row.length;c++)if(parseDH(row[c]))d++;if(d>dc){dc=d;dr=r;}}const cm={};if(yr>=0){let mr=-1,mcn=5;for(let r=yr;r<Math.min(yr+3,scan);r++){const row=aoa[r]||[];let m=0;for(let c=nameCol+1;c<row.length;c++)if(monthIndex(row[c])>=0)m++;if(m>mcn){mcn=m;mr=r;}}const yrow=aoa[yr]||[];let cy=null;for(let c=nameCol+1;c<mc;c++){if(isYear(yrow[c]))cy=+yrow[c];const mi=mr>=0?monthIndex((aoa[mr]||[])[c]):-1;if(cy!=null&&mi>=0)cm[c]={year:cy,month:mi};}if(mr<0){let c=nameCol+1;while(c<mc){if(isYear(yrow[c])){const y=+yrow[c];for(let m=0;m<12&&c+m<mc;m++)cm[c+m]={year:y,month:m};c+=12;}else c++;}}}else if(dr>=0){const row=aoa[dr]||[];for(let c=nameCol+1;c<row.length;c++){const d=parseDH(row[c]);if(d)cm[c]=d;}}else return null;if(!Object.keys(cm).length)return null;return buildFromMap(aoa,nameCol,cm,Math.max(yr,dr));}
-function attach(parsed){const years=parsed.years;const national={};years.forEach(y=>{national[y]=Array(12).fill(null);Object.values(parsed.mines).forEach(s=>{(s[y]||[]).forEach((v,m)=>{if(v!=null)national[y][m]=(national[y][m]||0)+v;});});});LOADED[SEL]={mines:parsed.mines,national,years};activeMine=null;renderMineList();drawMine();}
-function handleFile(file){setStatus('Leyendo '+file.name+' …','load');const rdr=new FileReader();rdr.onload=e=>{try{
-  if(/\.json$/i.test(file.name)){const j=JSON.parse(new TextDecoder().decode(e.target.result));if(j&&j.minerals){loadJSON(j);return;}}
-  const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});let order=wb.SheetNames.slice().sort((a,b)=>(b.toLowerCase().includes(SEL.toLowerCase())?1:0)-(a.toLowerCase().includes(SEL.toLowerCase())?1:0));let best=null;for(const sn of order){const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:null});const p=tryParse(aoa);if(p&&(!best||Object.keys(p.mines).length>Object.keys(best.mines).length))best=p;}
-  if(best){attach(best);setStatus(`✓ ${SEL}: ${Object.keys(best.mines).length} unidades cargadas · (BCRP nacional sigue activo)`,bcrpOk?'ok':'');}else openMapping(wb);
-}catch(err){console.error(err);setStatus('No se pudo leer: '+err.message,'err');}};rdr.onerror=()=>setStatus('Error al leer.','err');rdr.readAsArrayBuffer(file);}
-function loadJSON(j){let cu=0,cn=0;Object.keys(j.minerals).forEach(name=>{if(!META[name])return;const md=j.minerals[name];
-  if(md.mines&&Object.keys(md.mines).length){const mines=md.mines;const years=md.years||[...new Set(Object.values(mines).flatMap(s=>Object.keys(s)))].map(Number).sort((a,b)=>a-b);const norm={};Object.keys(mines).forEach(mn=>{norm[mn]={};years.forEach(y=>norm[mn][y]=(mines[mn][y]||mines[mn][String(y)]||Array(12).fill(null)).map(v=>v==null?null:+v));});const national={};years.forEach(y=>{national[y]=Array(12).fill(null);Object.values(norm).forEach(s=>{(s[y]||[]).forEach((v,m)=>{if(v!=null)national[y][m]=(national[y][m]||0)+v;});});});LOADED[name]={mines:norm,national,years};cu++;}
-  if(md.national&&!bcrpOk){const nat=md.national;const ny={};Object.keys(nat).forEach(y=>{ny[+y]=(nat[y]||Array(12).fill(null)).map(v=>v==null?null:+v);});NAT[name]=ny;cn++;}
-});
-if(cn&&!bcrpOk)setStatus('data.json (nacional mensual) · '+cn+' minerales'+(cu?` · ${cu} con detalle por unidad`:''),'ok');
-else if(cu)setStatus('✓ data.json · '+cu+' minerales por unidad'+(bcrpOk?' · BCRP nacional activo':''),bcrpOk?'ok':'');
-renderAll();}
-function openMapping(wb){setStatus('Estructura no reconocida — mapeo manual','err');document.getElementById('mapMin').textContent=SEL.toLowerCase();const md=document.getElementById('mapModal');md.classList.add('open');const sl=document.getElementById('mapSheet');sl.innerHTML=wb.SheetNames.map(s=>`<option>${s}</option>`).join('');const rp=()=>{const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sl.value],{header:1,raw:true,defval:null}).slice(0,12);const cols=Math.max(...aoa.map(r=>r?r.length:0));document.getElementById('mapPreview').innerHTML='<table>'+aoa.map(r=>'<tr>'+Array.from({length:cols}).map((_,c)=>`<td>${r&&r[c]!=null?String(r[c]).slice(0,14):''}</td>`).join('')+'</tr>').join('')+'</table>';const oC=Array.from({length:cols}).map((_,c)=>`<option value="${c}">Col ${c}</option>`).join('');const oR=aoa.map((_,r)=>`<option value="${r}">Fila ${r}</option>`).join('');document.getElementById('mapNameCol').innerHTML=oC;document.getElementById('mapYearRow').innerHTML=oR;document.getElementById('mapMonthRow').innerHTML=oR;};sl.onchange=rp;rp();document.getElementById('mapApply').onclick=()=>{const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sl.value],{header:1,raw:true,defval:null});const nc=+document.getElementById('mapNameCol').value,yr=+document.getElementById('mapYearRow').value,mr=+document.getElementById('mapMonthRow').value;const cm={};const yrow=aoa[yr]||[],mrow=aoa[mr]||[];let cy=null;const mx=Math.max(yrow.length,mrow.length);for(let c=nc+1;c<mx;c++){if(isYear(yrow[c]))cy=+yrow[c];let mi=monthIndex(mrow[c]);if(mi<0){const d=parseDH(yrow[c])||parseDH(mrow[c]);if(d){cm[c]=d;continue;}}if(cy!=null&&mi>=0)cm[c]={year:cy,month:mi};}const p=buildFromMap(aoa,nc,cm,Math.max(yr,mr));if(p){attach(p);md.classList.remove('open');setStatus(`✓ ${SEL}: ${Object.keys(p.mines).length} unidades`,'ok');}else setStatus('El mapeo no produjo datos.','err');};}
+function monthIndex(v){if(v==null)return -1;if(typeof v==='number'&&v>=1&&v<=12)return v-1;const s=String(v).toLowerCase().trim();const map={'ene':0,'enero':0,'jan':0,'feb':1,'febrero':1,'mar':2,'marzo':2,'abr':3,'abril':3,'apr':3,'may':4,'mayo':4,'jun':5,'junio':5,'jul':6,'julio':6,'ago':7,'agosto':7,'aug':7,'sep':8,'sept':8,'septiembre':8,'oct':9,'octubre':9,'nov':10,'noviembre':10,'dic':11,'diciembre':11,'dec':11};for(const k in map){if(s.startsWith(k))return map[k];}return -1;}
+function parseDateHeader(v){if(v instanceof Date)return{year:v.getFullYear(),month:v.getMonth()};const s=String(v).trim();let m=s.match(/(20\d{2})[-\/\.](\d{1,2})/);if(m)return{year:+m[1],month:+m[2]-1};m=s.match(/(\d{1,2})[-\/\.](20\d{2})/);if(m)return{year:+m[2],month:+m[1]-1};m=s.match(/([a-záéí]{3,})[-\/\.\s]*(\d{2,4})/i);if(m){const mi=monthIndex(m[1]);if(mi>=0){let y=+m[2];if(y<100)y+=2000;return{year:y,month:mi};}}return null;}
+function handleFile(file){setStatus('Leyendo '+file.name+' …');const rdr=new FileReader();rdr.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});let best=null;for(const sn of wb.SheetNames){const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:null});const p=tryParse(aoa);if(p&&(!best||Object.keys(p.mines).length>Object.keys(best.mines).length))best=p;}if(best&&Object.keys(best.mines).length)commitData(best);else openMapping(wb);}catch(err){console.error(err);setStatus('No se pudo leer: '+err.message,'err');}};rdr.onerror=()=>setStatus('Error al leer.','err');rdr.readAsArrayBuffer(file);}
+function tryParse(aoa){if(!aoa||aoa.length<3)return null;const scan=Math.min(aoa.length,25);const maxCols=Math.max(...aoa.slice(0,scan).map(r=>r?r.length:0));let nameCol=0,bt=-1;for(let c=0;c<Math.min(maxCols,4);c++){let t=0;for(let r=5;r<aoa.length;r++){const v=aoa[r]?.[c];if(typeof v==='string'&&v.trim()&&isNaN(+v))t++;}if(t>bt){bt=t;nameCol=c;}}let yearRow=-1;for(let r=0;r<scan;r++){if((aoa[r]||[]).filter(isYear).length>=4){yearRow=r;break;}}let dateRow=-1;for(let r=0;r<scan;r++){const row=aoa[r]||[];let dc=0;for(let c=nameCol+1;c<row.length;c++)if(parseDateHeader(row[c]))dc++;if(dc>=6){dateRow=r;break;}}const colMap={};if(yearRow>=0){let monthRow=-1;for(let r=yearRow;r<Math.min(yearRow+3,scan);r++){const row=aoa[r]||[];let mc=0;for(let c=nameCol+1;c<row.length;c++)if(monthIndex(row[c])>=0)mc++;if(mc>=6){monthRow=r;break;}}const yrow=aoa[yearRow]||[];let cY=null;for(let c=nameCol+1;c<maxCols;c++){if(isYear(yrow[c]))cY=+yrow[c];const mi=monthRow>=0?monthIndex((aoa[monthRow]||[])[c]):-1;if(cY!=null&&mi>=0)colMap[c]={year:cY,month:mi};}if(monthRow<0){let c=nameCol+1;while(c<maxCols){if(isYear(yrow[c])){const y=+yrow[c];for(let m=0;m<12&&(c+m)<maxCols;m++)colMap[c+m]={year:y,month:m};c+=12;}else c++;}}}else if(dateRow>=0){const row=aoa[dateRow]||[];for(let c=nameCol+1;c<row.length;c++){const d=parseDateHeader(row[c]);if(d)colMap[c]=d;}}else return null;if(!Object.keys(colMap).length)return null;return buildFromMap(aoa,nameCol,colMap,Math.max(yearRow,dateRow));}
+function buildFromMap(aoa,nameCol,colMap,headerEnd){const mines={};let national=null;const ys=new Set();for(let r=headerEnd+1;r<aoa.length;r++){const row=aoa[r];if(!row)continue;let name=row[nameCol];if(name==null)continue;name=String(name).trim();if(!name||isYear(name)||monthIndex(name)>=0)continue;if(/^(fuente|source|nota|note|elabor|\(|tabla|table)/i.test(name))continue;const s={};let any=false;for(const c in colMap){let v=row[c];if(v==null||v==='')continue;if(typeof v==='string')v=v.replace(/\./g,'').replace(',','.');v=parseFloat(v);if(isNaN(v))continue;const{year,month}=colMap[c];(s[year]=s[year]||Array(12).fill(null))[month]=v;any=true;ys.add(year);}if(!any)continue;if(/total|país|pais|nacional|chile/i.test(name))national=s;else mines[name]=s;}if(!Object.keys(mines).length)return null;let mx=0;Object.values(mines).forEach(s=>Object.values(s).forEach(a=>a.forEach(v=>{if(v)mx=Math.max(mx,v);})));const sc=mx>3000?1/1000:1;if(sc!==1){const f=s=>{for(const y in s)s[y]=s[y].map(v=>v==null?null:v*sc);};Object.values(mines).forEach(f);if(national)f(national);}const years=[...ys].sort((a,b)=>a-b);if(!national){national={};years.forEach(y=>{national[y]=Array(12).fill(null);Object.values(mines).forEach(s=>{(s[y]||[]).forEach((v,m)=>{if(v!=null)national[y][m]=(national[y][m]||0)+v;});});});}const cur=years[years.length-1];let lm=-1;(national[cur]||[]).forEach((v,m)=>{if(v!=null)lm=m;});return{mines,national,years,latest:lm>=0?{year:cur,month:lm}:null,scaled:sc!==1};}
+function commitData(parsed){MONTHLY=parsed;official=true;activeMine=null;activeYears={};parsed.years.forEach(y=>activeYears[y]=true);if(parsed.years.length>6){const keep=parsed.years.slice(-6);parsed.years.forEach(y=>activeYears[y]=keep.includes(y));}setStatus(`✓ Cochilco oficial · ${Object.keys(parsed.mines).length} faenas · ${parsed.years[0]}–${parsed.years[parsed.years.length-1]}`+(parsed.scaled?' · escalado a kt':''),'ok');buildYearChips();renderKPIs();renderMineList();renderRanking();const yd=ytdRowsMonthly();const top=[...yd.rows].sort((a,b)=>b.y26-a.y26)[0];if(top)selectMine(top.n);drawNat();}
+
+/* ===== mapping modal ===== */
+function openMapping(wb){setStatus('Estructura no reconocida — mapeo manual','err');const m=document.getElementById('mapModal');m.classList.add('open');const sl=document.getElementById('mapSheet');sl.innerHTML=wb.SheetNames.map(s=>`<option>${s}</option>`).join('');const rp=()=>{const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sl.value],{header:1,raw:true,defval:null}).slice(0,12);const cols=Math.max(...aoa.map(r=>r?r.length:0));document.getElementById('mapPreview').innerHTML='<table>'+aoa.map(r=>'<tr>'+Array.from({length:cols}).map((_,c)=>`<td>${r&&r[c]!=null?String(r[c]).slice(0,14):''}</td>`).join('')+'</tr>').join('')+'</table>';const oC=Array.from({length:cols}).map((_,c)=>`<option value="${c}">Col ${c}</option>`).join('');const oR=aoa.map((_,r)=>`<option value="${r}">Fila ${r}</option>`).join('');document.getElementById('mapNameCol').innerHTML=oC;document.getElementById('mapYearRow').innerHTML=oR;document.getElementById('mapMonthRow').innerHTML=oR;};sl.onchange=rp;rp();document.getElementById('mapApply').onclick=()=>{const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sl.value],{header:1,raw:true,defval:null});const nc=+document.getElementById('mapNameCol').value,yr=+document.getElementById('mapYearRow').value,mr=+document.getElementById('mapMonthRow').value;const cm={};const yrow=aoa[yr]||[],mrow=aoa[mr]||[];let cY=null;const mc=Math.max(yrow.length,mrow.length);for(let c=nc+1;c<mc;c++){if(isYear(yrow[c]))cY=+yrow[c];let mi=monthIndex(mrow[c]);if(mi<0){const d=parseDateHeader(yrow[c])||parseDateHeader(mrow[c]);if(d){cm[c]=d;continue;}}if(cY!=null&&mi>=0)cm[c]={year:cY,month:mi};}const parsed=buildFromMap(aoa,nc,cm,Math.max(yr,mr));if(parsed&&Object.keys(parsed.mines).length){document.getElementById('mapModal').classList.remove('open');commitData(parsed);}else setStatus('El mapeo no produjo datos.','err');};}
 document.getElementById('mapClose').onclick=()=>document.getElementById('mapModal').classList.remove('open');
-document.getElementById('helpBtn').onclick=()=>document.getElementById('helpModal').classList.add('open');
-document.getElementById('helpClose').onclick=()=>document.getElementById('helpModal').classList.remove('open');
+document.getElementById('autoBtn').onclick=()=>document.getElementById('autoModal').classList.add('open');
+document.getElementById('autoClose').onclick=()=>document.getElementById('autoModal').classList.remove('open');
 
-/* CSV */
-function exportCSV(){let csv='';if(isLoaded(SEL)){const L=LOADED[SEL];csv=`Unidad (${SEL}, ${META[SEL].unit}),Año,`+MONTHS.join(',')+'\n';Object.keys(L.mines).forEach(mn=>{L.years.forEach(y=>{if(L.mines[mn][y])csv+=`"${mn}",${y},`+L.mines[mn][y].map(v=>v==null?'':v).join(',')+'\n';});});}
-  else if(hasNat(SEL)){csv=`Nacional ${SEL} (${META[SEL].unit}) — BCRP/MINEM\nAño,`+MONTHS.join(',')+'\n';yearsOf(NAT[SEL]).forEach(y=>{csv+=`${y},`+NAT[SEL][y].map(v=>v==null?'':v).join(',')+'\n';});}
-  else csv='sin datos\n';
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`peru_${SEL.toLowerCase()}_mensual.csv`;a.click();}
+/* ===== CSV export ===== */
+function exportCSV(){let csv='';if(official){csv='Faena,Año,'+MONTHS.join(',')+'\n';Object.keys(MONTHLY.mines).forEach(m=>{const s=MONTHLY.mines[m];MONTHLY.years.forEach(y=>{if(s[y])csv+=`"${m}",${y},`+s[y].map(v=>v==null?'':v).join(',')+'\n';});});}else{csv='Faena,Propietario,Anual_2024_kt,Anual_2025_kt,YTD_ene-abr_2026_kt,YTD_ene-abr_2025_kt\n';MINES.forEach(m=>csv+=`"${m.n}","${m.o}",${m.a24??''},${m.a25??''},${m.y26??''},${m.y25??''}\n`);csv+=`"País nacional","Cochilco",${NAT.a24},${NAT.a25},${NAT.y26},${NAT.y25}\n`;csv+='\nMantoverde/Mantos Blancos — mensual (kt)\nFaena,Año,'+MONTHS.join(',')+'\n';Object.keys(MONTHLY_SEED).forEach(m=>{const s=MONTHLY_SEED[m];[2021,2022,2023,2024,2025,2026].forEach(y=>{csv+=`"${m}",${y},`+s[y].map(v=>v==null?'':v).join(',')+'\n';});});csv+='\nCapstone portfolio\nFaena,Pais,Q1_2026_kt,FY2025_kt,FY2024_kt,YoY_FY_%\n';CAPSTONE.forEach(r=>csv+=`"${r.mine}","${r.pais}",${r.q1},${r.fy25},${r.fy24??''},${r.yoy??''}\n`);}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=official?'cochilco_produccion_mina_mensual.csv':'ia_cobre_chile_minas.csv';a.click();}
 
-/* wiring */
+/* ===== wiring ===== */
 const fi=document.getElementById('file');document.getElementById('pickBtn').onclick=()=>fi.click();fi.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);};
 const drop=document.getElementById('drop');['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f);});
+document.getElementById('msearch').oninput=e=>renderMineList(e.target.value);
+document.getElementById('groupSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{groupMode=b.dataset.g;document.getElementById('groupSeg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));document.getElementById('listTitle').textContent=groupMode==='empresa'?'Empresas':'Faenas';document.getElementById('msearch').placeholder=groupMode==='empresa'?'Buscar empresa o faena…':'Buscar faena…';expandedCompany=null;renderMineList(document.getElementById('msearch').value);});
 document.getElementById('csvBtn').onclick=exportCSV;
-document.getElementById('evoModeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{evoMode=b.dataset.mode;drawEvo();});
-document.getElementById('reloadBtn').onclick=async()=>{await loadBCRP();renderMinerals();renderAll();};
-document.getElementById('mineModeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{mineMode=b.dataset.mode;drawMine();});
-document.body.addEventListener('input',e=>{if(e.target.id==='msearch')renderMineList(e.target.value);});
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected','false'));t.setAttribute('aria-selected','true');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+t.dataset.p).classList.add('active');if(t.dataset.p==='evo')drawEvo();if(t.dataset.p==='prod')drawMine();});
+document.getElementById('modeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{mineMode=b.dataset.mode;drawMine();});
+document.getElementById('natModeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{natMode=b.dataset.mode;drawNat();});
+document.getElementById('emptyAction').onclick=()=>{mineMode='historic';drawMine();};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected','false'));t.setAttribute('aria-selected','true');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+t.dataset.p).classList.add('active');if(t.dataset.p==='nat')drawNat();if(t.dataset.p==='mine')drawMine();});
 
-/* init */
-setMC();renderMinerals();renderKPIs();renderProd();renderReg();
-(async()=>{
-  await loadBCRP();                                   // NAT from BCRP live, or sparse fallback
-  try{const r=await fetch('./data_peru.json',{cache:'no-store'});if(r.ok){const j=await r.json();if(j&&j.minerals)loadJSON(j);}}catch(e){}  // fills NAT (if BCRP failed) + by-unit
-  renderMinerals();renderAll();
-})();
+/* ===== try same-origin data.json (one-click auto-update via GitHub Action) ===== */
+(async()=>{try{const r=await fetch('./data.json',{cache:'no-store'});if(r.ok){const j=await r.json();if(j&&j.mines&&Object.keys(j.mines).length){const years=j.years||Object.keys(Object.values(j.mines)[0]).map(Number).sort((a,b)=>a-b);commitData({mines:j.mines,national:j.national||null,years,latest:j.latest||null,scaled:false});setStatus('✓ data.json oficial · '+Object.keys(j.mines).length+' faenas','ok');return;}}}catch(e){}initSeed();})();
+function initSeed(){renderKPIs();renderCapstone();buildYearChips();renderMineList();renderRanking();selectMine('Mantoverde (Capstone)');drawNat();}
+renderCapstone(); // ensure cap table even before async resolves
 </script>
 </body>
 </html>
