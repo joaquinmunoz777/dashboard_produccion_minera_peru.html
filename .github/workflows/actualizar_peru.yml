@@ -4,20 +4,24 @@
 # (no hay CORS del lado servidor), así que esto funciona aunque tu red lo bloquee.
 #
 # Requisitos:
-#   1) Coloca actualizar_peru_bcrp.py y dashboard_produccion_minera_peru.html en el repo.
-#   2) Guarda este archivo en .github/workflows/actualizar_peru.yml
+#   1) index.html (el tablero) y actualizar_peru_bcrp.py en la raíz del repo.
+#   2) Este archivo en .github/workflows/actualizar_peru.yml
 #   3) Settings -> Actions -> General -> Workflow permissions -> "Read and write".
-#   4) (Opcional) Ejecuta manualmente: pestaña Actions -> "Actualizar producción Perú (BCRP)" -> Run workflow.
+#   4) Ejecuta manualmente: Actions -> "Actualizar produccion Peru (BCRP)" -> Run workflow.
 
 name: Actualizar producción Perú (BCRP)
 
 on:
   schedule:
-    - cron: "0 12 6 * *"      # día 6 de cada mes, 12:00 UTC (el BEM/BCRP publica a inicios de mes)
+    - cron: "0 12 6 * *"      # día 6 de cada mes, 12:00 UTC
   workflow_dispatch: {}        # botón manual
 
 permissions:
   contents: write
+
+concurrency:
+  group: actualizar-peru
+  cancel-in-progress: false
 
 jobs:
   actualizar:
@@ -37,15 +41,17 @@ jobs:
       - name: Descargar BCRP -> data_peru.json
         run: python actualizar_peru_bcrp.py
 
-      - name: Commit si hay cambios
+      - name: Commit y push (con rebase si la rama avanzó)
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain data_peru.json)" ]; then
-            git add data_peru.json
-            git commit -m "Actualiza data_peru.json (BCRP) [skip ci]"
-            git push
-            echo "data_peru.json actualizado."
-          else
+          if [ -z "$(git status --porcelain data_peru.json)" ]; then
             echo "Sin cambios en data_peru.json."
+            exit 0
           fi
+          git add data_peru.json
+          git commit -m "Actualiza data_peru.json (BCRP) [skip ci]"
+          # Traer lo ultimo de la rama y reaplicar el commit encima, luego empujar.
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+          echo "data_peru.json actualizado y subido."
